@@ -18,7 +18,7 @@
 ## 🎛️ Usage
 * Right-click to change the clockface asset.
 * All settings can be found in the executing folder in the file `DraggableConfig.json`.
-* You can add your own clockface assets into the subfolder `Assets`. I recommend they by 200x200.
+* You can add your own clockface assets into the subfolder `Assets`. I recommend the size 200px by 200px.
 
 ## 🧾 License/Warranty
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish and distribute copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
