@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Draggable (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "Draggable (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
