@@ -1,0 +1,140 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>Draggable</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Platforms>x86;x64;ARM64</Platforms>
+	  <RuntimeIdentifiers>win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
+	  <PublishProfile>win10-$(Platform).pubxml</PublishProfile>
+    <UseWinUI>true</UseWinUI>
+    <EnableMsixTooling>true</EnableMsixTooling>
+	  <Nullable>enable</Nullable>
+	  <ApplicationIcon>Assets\StoreLogo.ico</ApplicationIcon>
+	<!-- 
+		[for SDK v1.5 specifically]
+		https://learn.microsoft.com/en-us/windows/apps/windows-app-sdk/stable-channel#other-new-features-from-across-the-winappsdk
+		<PublishSingleFile>true</PublishSingleFile>
+		<SelfContained>true</SelfContained>
+		https://learn.microsoft.com/en-us/windows/apps/windows-app-sdk/stable-channel#known-issues
+		<ShouldComputeInputPris>true</ShouldComputeInputPris>
+	-->
+	  <LangVersion>latest</LangVersion>
+	  <EnableMsixTooling>true</EnableMsixTooling>
+	  <Version>1.0.0.0</Version>
+	  <FileVersion>1.0.0.0</FileVersion>
+	  <AssemblyVersion>1.0.0.0</AssemblyVersion>
+	  <PackageId>Draggable2024</PackageId>
+	  <Authors>The Guild</Authors>
+	<!-- 
+	  WindowsPackageType defines whether your app is packaged (MSIX) or unpackaged (None) 
+	-->
+	  <WindowsPackageType>None</WindowsPackageType>
+	  <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+	<!-- 
+	  Get rid of all the unnecessary pathing that MS adds and 
+	  makes the output match the traditional .NET Framework builds.
+	-->
+	  <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+	  <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+	<!-- 
+		 https://learn.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props#generatedocumentationfile
+	-->
+	  <!-- <GenerateDocumentationFile>true</GenerateDocumentationFile> -->
+	  <!-- 
+		 https://learn.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props#optimizeimplicitlytriggeredbuild 
+	-->
+	  <OptimizeImplicitlyTriggeredBuild>true</OptimizeImplicitlyTriggeredBuild>
+	<!-- 
+		 If true, this will create a subfolder named "refs" which contains all of the possible framework dependencies. The default value is false.
+		 https://learn.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props#preservecompilationcontext
+	-->
+	  <PreserveCompilationContext>false</PreserveCompilationContext>
+  </PropertyGroup>
+
+  <!-- 
+	 Define "IS_UNPACKAGED" constant if the app is an unpackaged app. 
+  -->
+  <PropertyGroup Condition="'$(WindowsPackageType)' == 'None'">
+	  <DefineConstants>IS_UNPACKAGED</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Assets\Fonts\Aptos.ttf" />
+    <None Remove="Assets\Fonts\Aptos_Mono.ttf" />
+    <None Remove="CompositionShadow.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.106">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.0.7" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.756" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.5.240607001" />
+    <Manifest Include="$(ApplicationManifest)" />
+  </ItemGroup>
+
+  <!--
+    Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging
+    Tools extension to be activated for this project even if the Windows App SDK Nuget
+    package has not yet been restored.
+  -->
+  <ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+    <ProjectCapability Include="Msix" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="CompositionShadow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <!--
+    Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution
+    Explorer "Package and Publish" context menu entry to be enabled for this project even if
+    the Windows App SDK Nuget package has not yet been restored.
+  -->
+  <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+    <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
+  </PropertyGroup>
+
+  <!-- 
+	  This target will remove the language folders inside the build output except the specified one. 
+  -->
+  <Target Name="RemoveFoldersWithMuiFiles" Condition="'$(WindowsPackageType)' == 'None'" AfterTargets="Build">
+	<ItemGroup>
+		<RemovingFiles Include="$(OutDir)*\*.mui" Exclude="$(OutDir)en-us\*.mui" />
+		<RemovingFolders Include="@(RemovingFiles->'%(RootDir)%(Directory)')" />
+		<RemovingCS Include="$(OutDir)cs" />
+		<RemovingDE Include="$(OutDir)de" />
+		<RemovingES Include="$(OutDir)es" />
+		<RemovingFR Include="$(OutDir)fr" />
+		<RemovingIT Include="$(OutDir)it" />
+		<RemovingJA Include="$(OutDir)ja" />
+		<RemovingKO Include="$(OutDir)ko" />
+		<RemovingPL Include="$(OutDir)pl" />
+		<RemovingRU Include="$(OutDir)ru" />
+		<RemovingTR Include="$(OutDir)tr" />
+		<RemovingZHS Include="$(OutDir)zh-Hans" />
+		<RemovingZHT Include="$(OutDir)zh-Hant" />
+	</ItemGroup>
+	<RemoveDir Directories="@(RemovingFolders)" />
+	<RemoveDir Directories="@(RemovingCS)" />
+	<RemoveDir Directories="@(RemovingDE)" />
+	<RemoveDir Directories="@(RemovingES)" />
+	<RemoveDir Directories="@(RemovingFR)" />
+	<RemoveDir Directories="@(RemovingIT)" />
+	<RemoveDir Directories="@(RemovingJA)" />
+	<RemoveDir Directories="@(RemovingKO)" />
+	<RemoveDir Directories="@(RemovingPL)" />
+	<RemoveDir Directories="@(RemovingRU)" />
+	<RemoveDir Directories="@(RemovingTR)" />
+	<RemoveDir Directories="@(RemovingZHS)" />
+	<RemoveDir Directories="@(RemovingZHT)" />
+  </Target>
+</Project>

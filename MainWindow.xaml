@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Window
+    x:Class="Draggable.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:Draggable"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid
+        x:Name="root"
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
+        Background="{ThemeResource GradientBackgroundBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <!--#region [Custom TitleBar]-->
+        <Grid
+            x:Name="CustomTitleBar"
+            Grid.Row="0"
+            Height="30"
+            Margin="0">
+            <StackPanel Orientation="Horizontal">
+                <Image
+                    Width="25"
+                    Height="25"
+                    Margin="4,1"
+                    Source="ms-appx:///Assets/StoreLogo.png" />
+                <TextBlock
+                    Margin="2,0"
+                    VerticalAlignment="Center"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Text="{x:Bind Title, Mode=OneWay}" />
+            </StackPanel>
+        </Grid>
+        <!--#endregion-->
+
+        <Grid
+            x:Name="MainGrid"
+            Grid.Row="1"
+            Margin="0"
+            Padding="0"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            Background="Transparent">
+            <!--<local:CompositionShadow
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                BlurRadius="3"
+                OffsetX="3"
+                OffsetY="3"
+                Opacity="0.7"
+                Color="#000000">-->
+            <Image
+                x:Name="clockImage"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Opacity="0.6"
+                Source="ms-appx:///Assets/Clockface6c.png"
+                Stretch="None" />
+            <!--</local:CompositionShadow>-->
+            <Canvas
+                x:Name="clockCanvas"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+                <Line
+                    x:Name="hourHand"
+                    Opacity="0.75"
+                    Stroke="RoyalBlue"
+                    StrokeThickness="5"
+                    X1="0"
+                    X2="0"
+                    Y1="0"
+                    Y2="-45" />
+
+                <Line
+                    x:Name="minuteHand"
+                    Opacity="0.75"
+                    Stroke="#E0E0E0"
+                    StrokeThickness="4"
+                    X1="0"
+                    X2="0"
+                    Y1="0"
+                    Y2="-60" />
+                <Line
+                    x:Name="secondHand"
+                    Opacity="0.75"
+                    Stroke="Firebrick"
+                    StrokeThickness="3"
+                    X1="0"
+                    X2="0"
+                    Y1="0"
+                    Y2="-80" />
+                <Ellipse
+                    x:Name="outterCenter"
+                    Canvas.Left="-6"
+                    Canvas.Top="-6"
+                    Width="13"
+                    Height="13"
+                    Fill="#505050"
+                    Opacity="0.9" />
+                <Ellipse
+                    x:Name="innerCenter"
+                    Canvas.Left="-2"
+                    Canvas.Top="-2"
+                    Width="5"
+                    Height="5"
+                    Fill="#E0E0E0"
+                    Opacity="0.9" />
+            </Canvas>
+            <TextBlock
+                x:Name="tbInfo"
+                Margin="0,0,0,20"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Bottom"
+                FontFamily="{ThemeResource SecondaryFont}"
+                FontSize="24"
+                Text="Drag Me Around" />
+        </Grid>
+    </Grid>
+</Window>
