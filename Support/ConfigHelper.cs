@@ -50,6 +50,22 @@ public class Config
     [JsonPropertyName("opacity")]
     public double opacity = 0.6;
 
+    [JsonInclude]
+    [JsonPropertyName("randomHands")]
+    public bool randomHands = false;
+
+    [JsonInclude]
+    [JsonPropertyName("hourColor")]
+    public string hourColor = "4169E1";   // blue
+
+    [JsonInclude]
+    [JsonPropertyName("minuteColor")]
+    public string minuteColor = "404040"; // dark gray
+
+    [JsonInclude]
+    [JsonPropertyName("secondColor")]
+    public string secondColor = "B22222"; // red
+
     public override string ToString() => JsonSerializer.Serialize<Config>(this, new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull });
 }
 
