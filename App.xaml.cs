@@ -133,7 +133,11 @@ public static bool IsPackaged { get => true; }
                     opacity = 0.7,
                     windowW = m_width,
                     windowH = m_height,
-                    clockFace = "Clockface3c"
+                    clockFace = "Clockface3c",
+                    randomHands = false,
+                    hourColor = "4169E1",   // blue
+                    minuteColor = "404040", // dark gray
+                    secondColor = "B22222"  // red
                 };
                 ConfigHelper.SaveConfig(LocalConfig);
             }
@@ -179,7 +183,7 @@ public static bool IsPackaged { get => true; }
                 {
                     // Add debounce in scenarios where this event could be hammered.
                     var idleTime = DateTime.Now - _lastMove;
-                    if (idleTime.TotalSeconds > 1.01d && LocalConfig != null)
+                    if (idleTime.TotalSeconds > 0.5d && LocalConfig != null)
                     {
                         _lastMove = DateTime.Now;
                         if (s.Position.X > 0 && s.Position.Y > 0 && s.Size.Height > 0 && s.Size.Width > 0)
@@ -205,7 +209,7 @@ public static bool IsPackaged { get => true; }
                                 else
                                 {
                                     //appWin.IsShownInSwitchers = false;
-                                    Debug.WriteLine($"[INFO] Ignoring position saving (window maximized)");
+                                    Debug.WriteLine($"[INFO] Ignoring position saving (window maximized or restored)");
                                 }
                             }
                         }
@@ -593,6 +597,7 @@ public static bool IsPackaged { get => true; }
     }
     #endregion
 
+    #region [Miscellaneous]
     public static void CloseAllDialogs()
     {
         if (App.MainRoot?.XamlRoot == null) { return; }
@@ -641,4 +646,5 @@ public static bool IsPackaged { get => true; }
         catch (Exception) { }
         return $"{sb}";
     }
+    #endregion
 }

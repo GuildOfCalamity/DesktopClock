@@ -7,7 +7,6 @@
     xmlns:local="using:Draggable"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
-
     <Grid
         x:Name="root"
         HorizontalAlignment="Stretch"
@@ -38,6 +37,7 @@
         </Grid>
         <!--#endregion-->
 
+        <!--#region [Clockface Content]-->
         <Grid
             x:Name="MainGrid"
             Grid.Row="1"
@@ -66,6 +66,8 @@
                 x:Name="clockCanvas"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center">
+
+                <!--#region [Hour]-->
                 <Line
                     x:Name="hourHand"
                     Opacity="0.75"
@@ -75,16 +77,37 @@
                     X2="0"
                     Y1="0"
                     Y2="-45" />
+                <Rectangle
+                    x:Name="hourHand2"
+                    Width="4"
+                    Height="45"
+                    RadiusX="1"
+                    RadiusY="1"
+                    Stroke="RoyalBlue"
+                    StrokeThickness="4" />
+                <!--#endregion-->
 
+                <!--#region [Minute]-->
                 <Line
                     x:Name="minuteHand"
                     Opacity="0.75"
-                    Stroke="#E0E0E0"
+                    Stroke="#C0C0C0"
                     StrokeThickness="4"
                     X1="0"
                     X2="0"
                     Y1="0"
                     Y2="-60" />
+                <Rectangle
+                    x:Name="minuteHand2"
+                    Width="3"
+                    Height="60"
+                    RadiusX="2"
+                    RadiusY="2"
+                    Stroke="#C0C0C0"
+                    StrokeThickness="3" />
+                <!--#endregion-->
+
+                <!--#region [Second]-->
                 <Line
                     x:Name="secondHand"
                     Opacity="0.75"
@@ -94,6 +117,17 @@
                     X2="0"
                     Y1="0"
                     Y2="-80" />
+                <Rectangle
+                    x:Name="secondHand2"
+                    Width="2"
+                    Height="80"
+                    RadiusX="2"
+                    RadiusY="2"
+                    Stroke="Firebrick"
+                    StrokeThickness="2" />
+                <!--#endregion-->
+
+                <!--#region [Center]-->
                 <Ellipse
                     x:Name="outterCenter"
                     Canvas.Left="-6"
@@ -110,14 +144,18 @@
                     Height="5"
                     Fill="#E0E0E0"
                     Opacity="0.9" />
+                <!--#endregion-->
+
             </Canvas>
+            <!--#endregion-->
+
             <TextBlock
                 x:Name="tbInfo"
                 Margin="0,0,0,20"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Bottom"
                 FontFamily="{ThemeResource SecondaryFont}"
-                FontSize="24"
+                FontSize="12"
                 Text="Drag Me Around" />
         </Grid>
     </Grid>
