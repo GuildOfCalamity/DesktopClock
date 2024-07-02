@@ -145,11 +145,11 @@ public sealed partial class MainWindow : Window
                     //minuteHand.Stroke = scbMinute;
                     //secondHand.Stroke = scbSecond;
                     var clr1 = CreateWindowsColor(App.LocalConfig.hourColor);
-                    hourHand.Stroke = CreateTipBrush(clr1, clr1.DarkerBy(0.5F));
+                    hourHand.Stroke = CreateTipBrush(clr1, clr1.DarkerBy(0.5F), 0.4);
                     var clr2 = CreateWindowsColor(App.LocalConfig.minuteColor);
-                    minuteHand.Stroke = CreateTipBrush(clr2, clr2.DarkerBy(0.5F));
+                    minuteHand.Stroke = CreateTipBrush(clr2, clr2.DarkerBy(0.5F), 0.4);
                     var clr3 = CreateWindowsColor(App.LocalConfig.secondColor);
-                    secondHand.Stroke = CreateTipBrush(clr3, clr3.DarkerBy(0.5F));
+                    secondHand.Stroke = CreateTipBrush(clr3, clr3.DarkerBy(0.5F), 0.4);
 
                 }
                 catch (Exception ex)
@@ -206,9 +206,9 @@ public sealed partial class MainWindow : Window
     /// <param name="c1">offset 0.9 color</param>
     /// <param name="c2">offset 1.0 color</param>
     /// <returns><see cref="LinearGradientBrush"/></returns>
-    static LinearGradientBrush CreateTipBrush(Windows.UI.Color c1, Windows.UI.Color c2)
+    static LinearGradientBrush CreateTipBrush(Windows.UI.Color c1, Windows.UI.Color c2, double length = 0.85)
     {
-        var gs1 = new GradientStop(); gs1.Color = c1; gs1.Offset = 0.9;
+        var gs1 = new GradientStop(); gs1.Color = c1; gs1.Offset = length;
         var gs2 = new GradientStop(); gs2.Color = c2; gs2.Offset = 1.0;
         var gsc = new GradientStopCollection() { gs1, gs2 };
         var lgb = new LinearGradientBrush
