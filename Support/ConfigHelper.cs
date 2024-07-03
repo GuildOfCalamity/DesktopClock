@@ -27,10 +27,6 @@ public class Config
     public string? metrics;
 
     [JsonInclude]
-    [JsonPropertyName("clockFace")]
-    public string clockFace = "Clockface3c";
-
-    [JsonInclude]
     [JsonPropertyName("windowX")]
     public int windowX = 10;
 
@@ -46,22 +42,60 @@ public class Config
     [JsonPropertyName("windowH")]
     public int windowH = 250;
 
+    /// <summary>
+    /// The image asset to use for the background.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("clockFace")]
+    public string clockFace = "Clockface1c";
+
+    /// <summary>
+    /// The clock face image alpha value.
+    /// </summary>
     [JsonInclude]
     [JsonPropertyName("opacity")]
     public double opacity = 0.6;
 
+    /// <summary>
+    /// The gradient effect length for the clock hands.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("gradientLength")]
+    public double gradientLength = 0.5;
+
+    /// <summary>
+    /// Whether to darken or lighten the gradient effect for the clock hands.
+    /// True = DarkenBy()
+    /// False = LightenBy()
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("gradientDarken")]
+    public bool gradientDarken = true;
+
+    /// <summary>
+    /// Whether to pick random colors at startup for the clock hands.
+    /// </summary>
     [JsonInclude]
     [JsonPropertyName("randomHands")]
     public bool randomHands = false;
 
+    /// <summary>
+    /// The hour hand color.
+    /// </summary>
     [JsonInclude]
     [JsonPropertyName("hourColor")]
     public string hourColor = "4169E1";   // blue
 
+    /// <summary>
+    /// The minute hand color.
+    /// </summary>
     [JsonInclude]
     [JsonPropertyName("minuteColor")]
     public string minuteColor = "404040"; // dark gray
 
+    /// <summary>
+    /// The second hand color.
+    /// </summary>
     [JsonInclude]
     [JsonPropertyName("secondColor")]
     public string secondColor = "B22222"; // red
@@ -457,8 +491,5 @@ public static class ConfigHelper
         return null;
     }
 
-    static string GetFileName(string name)
-    {
-        return string.Concat(name, FileExtension);
-    }
+    static string GetFileName(string name) => string.Concat(name, FileExtension);
 }

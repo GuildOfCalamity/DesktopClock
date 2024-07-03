@@ -34,11 +34,14 @@ public sealed partial class MainWindow : Window
     SolidColorBrush scbHour = new SolidColorBrush(Microsoft.UI.Colors.RoyalBlue);
     SolidColorBrush scbMinute = new SolidColorBrush(Microsoft.UI.Colors.Gray);
     SolidColorBrush scbSecond = new SolidColorBrush(Microsoft.UI.Colors.Firebrick);
+
+    #region [Testing Borderless]
     static int GWL_STYLE = -16;          // message for title bar's style
     static uint WS_SIZEBOX = 0x00040000;
     static int WS_DLGFRAME = 0x00400000; // window with double border but no title
     static int WS_BORDER = 0x00800000;   // window with border
     static int WS_CAPTION = WS_BORDER | WS_DLGFRAME; // window with a title bar
+    #endregion
 
     #region [Transparency]
     Windows.Win32.Foundation.HWND Handle;
@@ -133,24 +136,26 @@ public sealed partial class MainWindow : Window
                         clockImage.Source = img;
 
                     // Layer effect via opacity.
-                    clockImage.Opacity = App.LocalConfig.opacity > 1.0d ? 1.0d : App.LocalConfig.opacity;
+                    clockImage.Opacity = (App.LocalConfig.opacity > 1.0d) ? 1.0d : App.LocalConfig.opacity;
                     hourHand.Opacity = (App.LocalConfig.opacity + 0.15d > 1.0d) ? 1.0d : App.LocalConfig.opacity + 0.15d;
                     minuteHand.Opacity = (App.LocalConfig.opacity + 0.15d > 1.0d) ? 1.0d : App.LocalConfig.opacity + 0.15d;
                     secondHand.Opacity = (App.LocalConfig.opacity + 0.15d > 1.0d) ? 1.0d : App.LocalConfig.opacity + 0.15d;
-                    outterCenter.Opacity = (App.LocalConfig.opacity + 0.25d > 1.0d) ? 1.0d : App.LocalConfig.opacity + 0.25d;
-                    innerCenter.Opacity = (App.LocalConfig.opacity + 0.25d > 1.0d) ? 1.0d : App.LocalConfig.opacity + 0.25d;
+                    //outterCenter.Opacity = (App.LocalConfig.opacity + 0.25d > 1.0d) ? 1.0d : App.LocalConfig.opacity + 0.25d;
+                    //innerCenter.Opacity = (App.LocalConfig.opacity + 0.25d > 1.0d) ? 1.0d : App.LocalConfig.opacity + 0.25d;
+                    radialCenter.Opacity = (App.LocalConfig.opacity + 0.25d > 1.0d) ? 1.0d : App.LocalConfig.opacity + 0.25d;
 
                     // Color hands via config values.
                     //hourHand.Stroke = scbHour;
                     //minuteHand.Stroke = scbMinute;
                     //secondHand.Stroke = scbSecond;
+                    var length = App.LocalConfig.gradientLength;
+                    var darken = App.LocalConfig.gradientDarken;
                     var clr1 = CreateWindowsColor(App.LocalConfig.hourColor);
-                    hourHand.Stroke = CreateTipBrush(clr1, clr1.DarkerBy(0.5F), 0.4);
+                    hourHand.Stroke = CreateTipBrush(clr1, darken ? clr1.DarkerBy(0.5F) : clr1.LighterBy(0.5F), length <= 1.0 ? length : 0.5);
                     var clr2 = CreateWindowsColor(App.LocalConfig.minuteColor);
-                    minuteHand.Stroke = CreateTipBrush(clr2, clr2.DarkerBy(0.5F), 0.4);
+                    minuteHand.Stroke = CreateTipBrush(clr2, darken ? clr2.DarkerBy(0.5F) : clr2.LighterBy(0.5F), length <= 1.0 ? length : 0.5);
                     var clr3 = CreateWindowsColor(App.LocalConfig.secondColor);
-                    secondHand.Stroke = CreateTipBrush(clr3, clr3.DarkerBy(0.5F), 0.4);
-
+                    secondHand.Stroke = CreateTipBrush(clr3, darken ? clr3.DarkerBy(0.5F) : clr3.LighterBy(0.5F), length <= 1.0 ? length : 0.5);
                 }
                 catch (Exception ex)
                 {
@@ -352,10 +357,7 @@ public sealed partial class MainWindow : Window
                         if (img != null)
                             clockImage.Source = img;
                     }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine($"[ERROR] {ex.Message}");
-                    }
+                    catch (Exception) { }
                 });
             }
         }

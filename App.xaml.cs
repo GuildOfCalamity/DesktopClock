@@ -32,8 +32,8 @@ namespace Draggable;
 /// </summary>
 public partial class App : Application
 {
-    int m_width = 240;
-    int m_height = 260;
+    int m_width = 245;
+    int m_height = 270; // including titlebar
     Window? m_window;
     public static bool IsClosing { get; set; } = false;
     public static IntPtr WindowHandle { get; set; }
@@ -79,7 +79,6 @@ public static bool IsPackaged { get => true; }
     public App()
     {
         Debug.WriteLine($"[INFO] {System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}__{System.Reflection.MethodBase.GetCurrentMethod()?.Name} [{DateTime.Now.ToString("hh:mm:ss.fff tt")}]");
-        Debug.WriteLine($"[INFO] {ReflectPrimitive()}");
 
         App.Current.DebugSettings.FailFastOnErrors = false;
 
@@ -92,6 +91,11 @@ public static bool IsPackaged { get => true; }
         #endregion
 
         this.InitializeComponent();
+
+        foreach (var ra in GetReferencedAssemblies())
+        {
+            Debug.WriteLine($"[INFO] {ra.Key} {ra.Value}");
+        }
     }
 
     /// <summary>
@@ -130,10 +134,12 @@ public static bool IsPackaged { get => true; }
                 {
                     version = $"{App.GetCurrentAssemblyVersion()}",
                     metrics = "N/A",
-                    opacity = 0.7,
+                    opacity = 0.6,
+                    gradientLength = 0.5,
+                    gradientDarken = true,
                     windowW = m_width,
                     windowH = m_height,
-                    clockFace = "Clockface3c",
+                    clockFace = "Clockface1c",
                     randomHands = false,
                     hourColor = "4169E1",   // blue
                     minuteColor = "404040", // dark gray
@@ -144,6 +150,47 @@ public static bool IsPackaged { get => true; }
             catch (Exception ex)
             {
                 DebugLog($"[ERROR] {nameof(ConfigHelper.SaveConfig)}: {ex.Message}");
+            }
+        }
+        #endregion
+
+        #region [AppActivationArguments]
+        var appInst = Microsoft.Windows.AppLifecycle.AppInstance.GetCurrent();
+        if (appInst != null)
+        {
+            var activationArguments = appInst.GetActivatedEventArgs();
+            DebugLog($"Activation kind: {activationArguments.Kind}");
+            
+            if(activationArguments.Data is Windows.ApplicationModel.Activation.IToastNotificationActivatedEventArgs tnaea)
+                Debug.WriteLine($"[INFO] IToastNotificationActivatedEventArgs: {tnaea.UserInput.Count}");
+            if (activationArguments.Data is Windows.ApplicationModel.Activation.IStartupTaskActivatedEventArgs staea)
+                Debug.WriteLine($"[INFO] IStartupTaskActivatedEventArgs: {staea.TaskId}");
+            if (activationArguments.Data is Windows.ApplicationModel.Activation.IBackgroundActivatedEventArgs baea)
+                Debug.WriteLine($"[INFO] IBackgroundActivatedEventArgs: {baea.TaskInstance.SuspendedCount}");
+            if (activationArguments.Data is Windows.ApplicationModel.Activation.IApplicationViewActivatedEventArgs avaea)
+                Debug.WriteLine($"[INFO] IApplicationViewActivatedEventArgs: {avaea.CurrentlyShownApplicationViewId}");
+            if (activationArguments.Data is Windows.ApplicationModel.Activation.IActivatedEventArgsWithUser aeawu)
+                Debug.WriteLine($"[INFO] IActivatedEventArgsWithUser: {aeawu.User.Type}");
+            if (activationArguments.Data is Windows.ApplicationModel.Activation.IDeviceActivatedEventArgs daea)
+                Debug.WriteLine($"[INFO] IDeviceActivatedEventArgs: {daea.DeviceInformationId}");
+            if (activationArguments.Data is Windows.ApplicationModel.Activation.IFileActivatedEventArgs faea)
+                Debug.WriteLine($"[INFO] IFileActivatedEventArgs: {faea.Files.Count}");
+            if (activationArguments.Data is Windows.ApplicationModel.Activation.ISearchActivatedEventArgs saea)
+                Debug.WriteLine($"[INFO] ISearchActivatedEventArgs: {saea.QueryText}");
+
+            if (activationArguments.Data is Windows.ApplicationModel.Activation.ILaunchActivatedEventArgs laea)
+            {
+                if (laea.PreviousExecutionState == ApplicationExecutionState.NotRunning || laea.PreviousExecutionState == ApplicationExecutionState.Terminated)
+                    DebugLog($"The app did not close normally: {laea.PreviousExecutionState}");
+                else
+                    DebugLog($"The app closed normally: {laea.PreviousExecutionState}");
+            }
+            else if (activationArguments.Data is Windows.ApplicationModel.Activation.IActivatedEventArgs aea)
+            {
+                if (aea.PreviousExecutionState == ApplicationExecutionState.NotRunning || aea.PreviousExecutionState == ApplicationExecutionState.Terminated)
+                    DebugLog($"The app did not close normally: {aea.PreviousExecutionState}");
+                else
+                    DebugLog($"The app closed normally: {aea.PreviousExecutionState}");
             }
         }
         #endregion
@@ -645,6 +692,60 @@ public static bool IsPackaged { get => true; }
         }
         catch (Exception) { }
         return $"{sb}";
+    }
+
+    /// <summary>
+    /// Returns an exhaustive list of all modules involved in the current process.
+    /// </summary>
+    public static List<string> GetProcessDependencies()
+    {
+        List<string> result = new List<string>();
+        try
+        {
+            string self = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name + ".exe";
+            System.Diagnostics.ProcessModuleCollection pmc = System.Diagnostics.Process.GetCurrentProcess().Modules;
+            IOrderedEnumerable<System.Diagnostics.ProcessModule> pmQuery = pmc
+                .OfType<System.Diagnostics.ProcessModule>()
+                .Where(pt => pt.ModuleMemorySize > 0)
+                .OrderBy(o => o.ModuleName);
+            foreach (var item in pmQuery)
+            {
+                //if (!item.ModuleName.Contains($"{self}"))
+                result.Add($"Module name: {item.ModuleName}, {(string.IsNullOrEmpty(item.FileVersionInfo.FileVersion) ? "version unknown" : $"v{item.FileVersionInfo.FileVersion}")}");
+                try { item.Dispose(); }
+                catch { }
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[ERROR] ProcessModuleCollection: {ex.Message}");
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// Returns the basic assemblies needed by the application.
+    /// </summary>
+    public static Dictionary<string, Version> GetReferencedAssemblies(bool addSelf = false)
+    {
+        Dictionary<string, Version> values = new Dictionary<string, Version>();
+        try
+        {
+            var assem = Assembly.GetExecutingAssembly();
+            int idx = 0; // to prevent key collisions only
+            if (addSelf)
+                values.Add($"{(++idx).AddOrdinal()}: {assem.GetName().Name}", assem.GetName().Version ?? new Version()); // add self
+            IOrderedEnumerable<AssemblyName> names = assem.GetReferencedAssemblies().OrderBy(o => o.Name);
+            foreach (var sas in names)
+            {
+                values.Add($"{(++idx).AddOrdinal()}: {sas.Name}", sas.Version ?? new Version());
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[ERROR] GetReferencedAssemblies: {ex.Message}");
+        }
+        return values;
     }
     #endregion
 }
