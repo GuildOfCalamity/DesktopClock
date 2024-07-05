@@ -117,14 +117,13 @@ public sealed partial class MainWindow : Window
         // Only perform asset updates if window is visible.
         if (args.WindowActivationState != WindowActivationState.Deactivated)
         {
-            UpdateClockHands();
-            
             SetIsAlwaysOnTop(this, true);
-            
             DispatcherQueue.TryEnqueue(async () =>
             {
                 try
                 {
+                    UpdateClockHands();
+
                     if (!showMessages)
                         tbInfo.Visibility = CustomTitleBar.Visibility = Visibility.Collapsed;
 
@@ -169,6 +168,7 @@ public sealed partial class MainWindow : Window
         }
     }
 
+    #region [Colors and Brushes]
     static SolidColorBrush CreateSolidColorBrush(string? colorValue)
     {
         if (!string.IsNullOrEmpty(colorValue) && colorValue.Length >= 6)
@@ -242,6 +242,7 @@ public sealed partial class MainWindow : Window
         };
         return lgb;
     }
+    #endregion
 
     #region [Clockface]
     void ClockTimerTick(object? sender, object e)
