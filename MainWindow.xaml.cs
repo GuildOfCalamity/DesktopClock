@@ -43,7 +43,7 @@ public sealed partial class MainWindow : Window
     static int WS_CAPTION = WS_BORDER | WS_DLGFRAME; // window with a title bar
     #endregion
 
-    #region [Transparency]
+    #region [Transparency Props]
     Windows.Win32.Foundation.HWND Handle;
     Windows.Win32.UI.WindowsAndMessaging.WINDOW_EX_STYLE WinExStyle
     {
@@ -107,8 +107,28 @@ public sealed partial class MainWindow : Window
         MainGrid.PointerMoved += MainGrid_PointerMoved;
         MainGrid.PointerReleased += MainGrid_PointerReleased;
         #endregion
+
+        MainGrid.PointerEntered += MainGrid_PointerEntered;
+        MainGrid.PointerExited += MainGrid_PointerExited;
     }
 
+    #region [Reactive Opacity]
+    void MainGrid_PointerExited(object sender, PointerRoutedEventArgs e)
+    {
+        clockImage.Opacity = (App.LocalConfig.opacity > 1.0d) ? 1.0d : App.LocalConfig.opacity;
+        hourHand.Opacity = (App.LocalConfig.opacity + 0.1d > 1.0d) ? 1.0d : App.LocalConfig.opacity + 0.1d;
+        minuteHand.Opacity = (App.LocalConfig.opacity + 0.1d > 1.0d) ? 1.0d : App.LocalConfig.opacity + 0.1d;
+        secondHand.Opacity = (App.LocalConfig.opacity + 0.1d > 1.0d) ? 1.0d : App.LocalConfig.opacity + 0.1d;
+        radialCenter.Opacity = (App.LocalConfig.opacity + 0.2d > 1.0d) ? 1.0d : App.LocalConfig.opacity + 0.2d;
+    }
+
+    void MainGrid_PointerEntered(object sender, PointerRoutedEventArgs e)
+    {
+        clockImage.Opacity = hourHand.Opacity = minuteHand.Opacity = secondHand.Opacity = radialCenter.Opacity = 1d;
+    }
+    #endregion
+
+    #region [Window Events]
     void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
     {
         if (App.IsClosing)
@@ -136,12 +156,10 @@ public sealed partial class MainWindow : Window
 
                     // Layer effect via opacity.
                     clockImage.Opacity = (App.LocalConfig.opacity > 1.0d) ? 1.0d : App.LocalConfig.opacity;
-                    hourHand.Opacity = (App.LocalConfig.opacity + 0.15d > 1.0d) ? 1.0d : App.LocalConfig.opacity + 0.15d;
-                    minuteHand.Opacity = (App.LocalConfig.opacity + 0.15d > 1.0d) ? 1.0d : App.LocalConfig.opacity + 0.15d;
-                    secondHand.Opacity = (App.LocalConfig.opacity + 0.15d > 1.0d) ? 1.0d : App.LocalConfig.opacity + 0.15d;
-                    //outterCenter.Opacity = (App.LocalConfig.opacity + 0.25d > 1.0d) ? 1.0d : App.LocalConfig.opacity + 0.25d;
-                    //innerCenter.Opacity = (App.LocalConfig.opacity + 0.25d > 1.0d) ? 1.0d : App.LocalConfig.opacity + 0.25d;
-                    radialCenter.Opacity = (App.LocalConfig.opacity + 0.25d > 1.0d) ? 1.0d : App.LocalConfig.opacity + 0.25d;
+                    hourHand.Opacity = (App.LocalConfig.opacity + 0.1d > 1.0d) ? 1.0d : App.LocalConfig.opacity + 0.1d;
+                    minuteHand.Opacity = (App.LocalConfig.opacity + 0.1d > 1.0d) ? 1.0d : App.LocalConfig.opacity + 0.1d;
+                    secondHand.Opacity = (App.LocalConfig.opacity + 0.1d > 1.0d) ? 1.0d : App.LocalConfig.opacity + 0.1d;
+                    radialCenter.Opacity = (App.LocalConfig.opacity + 0.2d > 1.0d) ? 1.0d : App.LocalConfig.opacity + 0.2d;
 
                     // Color hands via config values.
                     //hourHand.Stroke = scbHour;
@@ -167,6 +185,7 @@ public sealed partial class MainWindow : Window
             Debug.WriteLine($"[WARNING] Window state is deactivated.");
         }
     }
+    #endregion
 
     #region [Colors and Brushes]
     static SolidColorBrush CreateSolidColorBrush(string? colorValue)

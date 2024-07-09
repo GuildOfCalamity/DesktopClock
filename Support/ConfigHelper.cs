@@ -100,6 +100,13 @@ public class Config
     [JsonPropertyName("secondColor")]
     public string secondColor = "B22222"; // red
 
+    /// <summary>
+    /// Whether to show the app in the OS task bar.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("hideTaskbar")]
+    public bool hideTaskbar = false;
+
     public override string ToString() => JsonSerializer.Serialize<Config>(this, new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull });
 }
 

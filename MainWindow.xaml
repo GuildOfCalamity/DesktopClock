@@ -128,22 +128,6 @@
                 <!--#endregion-->
 
                 <!--#region [Center]-->
-                <!--<Ellipse
-                    x:Name="outterCenter"
-                    Canvas.Left="-6"
-                    Canvas.Top="-6"
-                    Width="13"
-                    Height="13"
-                    Fill="#505050"
-                    Opacity="0.9" />
-                <Ellipse
-                    x:Name="innerCenter"
-                    Canvas.Left="-2"
-                    Canvas.Top="-2"
-                    Width="5"
-                    Height="5"
-                    Fill="#E0E0E0"
-                    Opacity="0.9" />-->
                 <Ellipse
                     x:Name="radialCenter"
                     Canvas.Left="-6"

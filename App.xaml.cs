@@ -141,6 +141,7 @@ public static bool IsPackaged { get => true; }
                     windowH = m_height,
                     clockFace = "Clockface1c",
                     randomHands = false,
+                    hideTaskbar = false,
                     hourColor = "4169E1",   // blue
                     minuteColor = "404040", // dark gray
                     secondColor = "B22222"  // red
@@ -200,7 +201,16 @@ public static bool IsPackaged { get => true; }
         if (appWin != null)
         {
             // Gets or sets a value that indicates whether this window will appear in various system representations, such as ALT+TAB and taskbar.
-            appWin.IsShownInSwitchers = true;
+            if (LocalConfig.hideTaskbar)
+            {
+                appWin.IsShownInSwitchers = false;
+                appWin.TitleBar.IconShowOptions = IconShowOptions.HideIconAndSystemMenu;
+            }
+            else
+            {
+                appWin.IsShownInSwitchers = true;
+                appWin.TitleBar.IconShowOptions = IconShowOptions.ShowIconAndSystemMenu;
+            }
 
             // We don't have the Closing event exposed by default, so we'll use the AppWindow to compensate.
             appWin.Closing += (s, e) =>
@@ -241,12 +251,12 @@ public static bool IsPackaged { get => true; }
                             {
                                 if (op.State == OverlappedPresenterState.Minimized)
                                 {
-                                    //appWin.IsShownInSwitchers = true;
+                                    appWin.IsShownInSwitchers = true; // If accidentally minimized then show the task in the bar.
+                                    appWin.TitleBar.IconShowOptions = IconShowOptions.ShowIconAndSystemMenu;
                                     Debug.WriteLine($"[INFO] Window minimized");
                                 }
                                 else if (op.State != OverlappedPresenterState.Maximized)
                                 {
-                                    //appWin.IsShownInSwitchers = false;
                                     Debug.WriteLine($"[INFO] Updating window position to {s.Position.X},{s.Position.Y} and size to {s.Size.Width},{s.Size.Height}");
                                     LocalConfig.windowX = s.Position.X;
                                     LocalConfig.windowY = s.Position.Y;
@@ -255,7 +265,8 @@ public static bool IsPackaged { get => true; }
                                 }
                                 else
                                 {
-                                    //appWin.IsShownInSwitchers = false;
+                                    appWin.IsShownInSwitchers = true; // If accidentally maximized then show the task in the bar.
+                                    appWin.TitleBar.IconShowOptions = IconShowOptions.ShowIconAndSystemMenu;
                                     Debug.WriteLine($"[INFO] Ignoring position saving (window maximized or restored)");
                                 }
                             }
@@ -269,8 +280,6 @@ public static bool IsPackaged { get => true; }
                 appWin.SetIcon(System.IO.Path.Combine(Windows.ApplicationModel.Package.Current.InstalledLocation.Path, $"Assets/StoreLogo.ico"));
             else
                 appWin.SetIcon(System.IO.Path.Combine(AppContext.BaseDirectory, $"Assets/StoreLogo.ico"));
-
-            appWin.TitleBar.IconShowOptions = IconShowOptions.ShowIconAndSystemMenu;
         }
 
         m_window.Activate();
