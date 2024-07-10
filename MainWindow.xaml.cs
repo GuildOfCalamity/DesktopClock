@@ -15,6 +15,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
 
 using Windows.ApplicationModel;
+using Windows.Graphics;
 using Windows.Storage;
 using Windows.UI;
 
@@ -28,6 +29,7 @@ public sealed partial class MainWindow : Window
     int assetIndex = 0;
     bool useRoundedHands = false;
     bool showMessages = false;
+    bool initialized = false;
     DispatcherTimer tmrClock;
     List<string> clockAssets = new();
     byte[] rndBytes = new byte[3];
@@ -110,7 +112,9 @@ public sealed partial class MainWindow : Window
 
         MainGrid.PointerEntered += MainGrid_PointerEntered;
         MainGrid.PointerExited += MainGrid_PointerExited;
+        App.OnWindowSizeChanged += AppOnWindowSizeChanged;
     }
+
 
     #region [Reactive Opacity]
     void MainGrid_PointerExited(object sender, PointerRoutedEventArgs e)
@@ -147,12 +151,33 @@ public sealed partial class MainWindow : Window
                     if (!showMessages)
                         tbInfo.Visibility = CustomTitleBar.Visibility = Visibility.Collapsed;
 
-                    if (App.LocalConfig.clockFace.EndsWith(".png"))
-                        App.LocalConfig.clockFace = App.LocalConfig.clockFace.Replace(".png", "");
+                    // Initialize dial sizes and image on first activation.
+                    if (!initialized)
+                    {
+                        if (App.LocalConfig.clockFace.EndsWith(".png"))
+                            App.LocalConfig.clockFace = App.LocalConfig.clockFace.Replace(".png", "");
 
-                    BitmapImage? img = await LoadImageAtRuntime($"{App.LocalConfig.clockFace}.png");
-                    if (img != null)
-                        clockImage.Source = img;
+                        BitmapImage? img = await LoadImageAtRuntime($"{App.LocalConfig.clockFace}.png");
+                        if (img != null)
+                            clockImage.Source = img;
+
+                        AppOnWindowSizeChanged(new SizeInt32(App.LocalConfig.windowW, App.LocalConfig.windowH));
+
+                        // Color hands via config values.
+                        //hourHand.Stroke = scbHour;
+                        //minuteHand.Stroke = scbMinute;
+                        //secondHand.Stroke = scbSecond;
+                        var length = App.LocalConfig.gradientLength;
+                        var darken = App.LocalConfig.gradientDarken;
+                        var clr1 = CreateWindowsColor(App.LocalConfig.hourColor);
+                        hourHand.Stroke = CreateTipBrush(clr1, darken ? clr1.DarkerBy(0.5F) : clr1.LighterBy(0.5F), length <= 1.0 ? length : 0.5);
+                        var clr2 = CreateWindowsColor(App.LocalConfig.minuteColor);
+                        minuteHand.Stroke = CreateTipBrush(clr2, darken ? clr2.DarkerBy(0.5F) : clr2.LighterBy(0.5F), length <= 1.0 ? length : 0.5);
+                        var clr3 = CreateWindowsColor(App.LocalConfig.secondColor);
+                        secondHand.Stroke = CreateTipBrush(clr3, darken ? clr3.DarkerBy(0.5F) : clr3.LighterBy(0.5F), length <= 1.0 ? length : 0.5);
+
+                        initialized = true;
+                    }
 
                     // Layer effect via opacity.
                     clockImage.Opacity = (App.LocalConfig.opacity > 1.0d) ? 1.0d : App.LocalConfig.opacity;
@@ -160,23 +185,10 @@ public sealed partial class MainWindow : Window
                     minuteHand.Opacity = (App.LocalConfig.opacity + 0.1d > 1.0d) ? 1.0d : App.LocalConfig.opacity + 0.1d;
                     secondHand.Opacity = (App.LocalConfig.opacity + 0.1d > 1.0d) ? 1.0d : App.LocalConfig.opacity + 0.1d;
                     radialCenter.Opacity = (App.LocalConfig.opacity + 0.2d > 1.0d) ? 1.0d : App.LocalConfig.opacity + 0.2d;
-
-                    // Color hands via config values.
-                    //hourHand.Stroke = scbHour;
-                    //minuteHand.Stroke = scbMinute;
-                    //secondHand.Stroke = scbSecond;
-                    var length = App.LocalConfig.gradientLength;
-                    var darken = App.LocalConfig.gradientDarken;
-                    var clr1 = CreateWindowsColor(App.LocalConfig.hourColor);
-                    hourHand.Stroke = CreateTipBrush(clr1, darken ? clr1.DarkerBy(0.5F) : clr1.LighterBy(0.5F), length <= 1.0 ? length : 0.5);
-                    var clr2 = CreateWindowsColor(App.LocalConfig.minuteColor);
-                    minuteHand.Stroke = CreateTipBrush(clr2, darken ? clr2.DarkerBy(0.5F) : clr2.LighterBy(0.5F), length <= 1.0 ? length : 0.5);
-                    var clr3 = CreateWindowsColor(App.LocalConfig.secondColor);
-                    secondHand.Stroke = CreateTipBrush(clr3, darken ? clr3.DarkerBy(0.5F) : clr3.LighterBy(0.5F), length <= 1.0 ? length : 0.5);
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"[ERROR] Clock setup: {ex.Message}");
+                    Debug.WriteLine($"[ERROR] Clock activation: {ex.Message}");
                 }
             });
         }
@@ -184,6 +196,74 @@ public sealed partial class MainWindow : Window
         {
             Debug.WriteLine($"[WARNING] Window state is deactivated.");
         }
+    }
+
+    void AppOnWindowSizeChanged(Windows.Graphics.SizeInt32 size)
+    {
+        var total = size.Width + size.Height;
+        var ratio = (float)size.Width / (float)size.Height;
+
+        // Ignore invalid aspects.
+        if (ratio < 0.8 || ratio > 1.1)
+        {
+            Debug.WriteLine($"[WARNING] Aspect ratio ({ratio}) is invalid, skipping hand resize.");
+            return;
+        }
+
+        // This scaling should be reworked, it's not exactly linear. These example values are approximations.
+        switch (total)
+        {
+            // Image fidelity will degrade for large sizes.
+            case int val when val >= 1500: hourHand.Y2 = -120; minuteHand.Y2 = -220; secondHand.Y2 = -260;
+                hourHand.StrokeThickness = 9; minuteHand.StrokeThickness = 8; secondHand.StrokeThickness = 7;
+                break;
+            case int val when val >= 1400: hourHand.Y2 = -110; minuteHand.Y2 = -190; secondHand.Y2 = -240;
+                hourHand.StrokeThickness = 8; minuteHand.StrokeThickness = 7; secondHand.StrokeThickness = 6;
+                break;
+            case int val when val >= 1300: hourHand.Y2 = -105; minuteHand.Y2 = -160; secondHand.Y2 = -220;
+                hourHand.StrokeThickness = 8; minuteHand.StrokeThickness = 7; secondHand.StrokeThickness = 6;
+                break;
+            case int val when val >= 1200: hourHand.Y2 = -100; minuteHand.Y2 = -140; secondHand.Y2 = -180;
+                hourHand.StrokeThickness = 7; minuteHand.StrokeThickness = 6; secondHand.StrokeThickness = 5;
+                break;
+            case int val when val >= 1100: hourHand.Y2 = -90; minuteHand.Y2 = -130; secondHand.Y2 = -170;
+                hourHand.StrokeThickness = 7; minuteHand.StrokeThickness = 6; secondHand.StrokeThickness = 5;
+                break;
+            case int val when val >= 1000: hourHand.Y2 = -85; minuteHand.Y2 = -120; secondHand.Y2 = -160;
+                hourHand.StrokeThickness = 7; minuteHand.StrokeThickness = 6; secondHand.StrokeThickness = 5;
+                break;
+            case int val when val >= 900: hourHand.Y2 = -80; minuteHand.Y2 = -100; secondHand.Y2 = -130;
+                hourHand.StrokeThickness = 6; minuteHand.StrokeThickness = 5; secondHand.StrokeThickness = 4;
+                break;
+            case int val when val >= 800: hourHand.Y2 = -75; minuteHand.Y2 = -90; secondHand.Y2 = -120;
+                hourHand.StrokeThickness = 6; minuteHand.StrokeThickness = 5; secondHand.StrokeThickness = 4;
+                break;
+            case int val when val >= 700: hourHand.Y2 = -60; minuteHand.Y2 = -80; secondHand.Y2 = -110;
+                hourHand.StrokeThickness = 5; minuteHand.StrokeThickness = 4; secondHand.StrokeThickness = 3;
+                break;
+            case int val when val >= 600: hourHand.Y2 = -50; minuteHand.Y2 = -70; secondHand.Y2 = -90;
+                hourHand.StrokeThickness = 5; minuteHand.StrokeThickness = 4; secondHand.StrokeThickness = 3;
+                break;
+            case int val when val >= 500: hourHand.Y2 = -40; minuteHand.Y2 = -59; secondHand.Y2 = -80;
+                hourHand.StrokeThickness = 5; minuteHand.StrokeThickness = 4; secondHand.StrokeThickness = 3;
+                break;
+            case int val when val >= 400: hourHand.Y2 = -32; minuteHand.Y2 = -48; secondHand.Y2 = -68;
+                hourHand.StrokeThickness = 5; minuteHand.StrokeThickness = 4; secondHand.StrokeThickness = 3;
+                break;
+            case int val when val >= 300: hourHand.Y2 = -22; minuteHand.Y2 = -35; secondHand.Y2 = -45;
+                hourHand.StrokeThickness = 4; minuteHand.StrokeThickness = 3; secondHand.StrokeThickness = 2;
+                break;
+            case int val when val >= 200: hourHand.Y2 = -18; minuteHand.Y2 = -27; secondHand.Y2 = -38;
+                hourHand.StrokeThickness = 4; minuteHand.StrokeThickness = 3; secondHand.StrokeThickness = 2;
+                break;
+            case int val when val >= 100: hourHand.Y2 = -15; minuteHand.Y2 = -20; secondHand.Y2 = -32;
+                hourHand.StrokeThickness = 4; minuteHand.StrokeThickness = 3; secondHand.StrokeThickness = 2;
+                break;
+            default: hourHand.Y2 = -10; minuteHand.Y2 = -15; secondHand.Y2 = -24;
+                hourHand.StrokeThickness = 4; minuteHand.StrokeThickness = 3; secondHand.StrokeThickness = 2;
+                break;
+        }
+        Debug.WriteLine($"[INFO] Total: {total}, Ratio: {ratio}, Hour.Y2: {hourHand.Y2}, Minute.Y2: {minuteHand.Y2}, Second.Y2: {secondHand.Y2}");
     }
     #endregion
 

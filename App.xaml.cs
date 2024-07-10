@@ -4,9 +4,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices.WindowsRuntime;
+using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
+
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -18,12 +19,10 @@ using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Navigation;
 using Microsoft.UI.Xaml.Shapes;
 
-using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.UI.Popups;
-using System.Text;
+
 
 namespace Draggable;
 
@@ -38,9 +37,11 @@ public partial class App : Application
     public static bool IsClosing { get; set; } = false;
     public static IntPtr WindowHandle { get; set; }
     public static FrameworkElement? MainRoot { get; set; }
+    public static event Action<Windows.Graphics.SizeInt32>? OnWindowSizeChanged = (size) => { };
 
     static bool _lastSave = false;
     static DateTime _lastMove = DateTime.Now;
+    static DateTime _lastSize = DateTime.Now;
     static Config? _localConfig;
     public static Config? LocalConfig
     {
@@ -234,6 +235,13 @@ public static bool IsPackaged { get => true; }
                 if (args.DidSizeChange)
                 {
                     Debug.WriteLine($"[INFO] Window size changed to {s.Size.Width},{s.Size.Height}");
+                    // Add debounce in scenarios where this event could be hammered.
+                    var idleTime = DateTime.Now - _lastSize;
+                    if (idleTime.TotalSeconds > 0.5d)
+                    {
+                        _lastSize = DateTime.Now;
+                        OnWindowSizeChanged?.Invoke(s.Size);
+                    }
                 }
 
                 if (args.DidPositionChange)

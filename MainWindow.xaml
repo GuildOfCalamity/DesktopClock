@@ -56,14 +56,16 @@
                 Color="#000000">-->
             <Image
                 x:Name="clockImage"
+                Margin="-1"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Opacity="0.6"
                 Source="ms-appx:///Assets/Clockface6c.png"
-                Stretch="None" />
+                Stretch="Uniform" />
             <!--</local:CompositionShadow>-->
             <Canvas
                 x:Name="clockCanvas"
+                Margin="-1"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center">
 
