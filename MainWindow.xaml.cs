@@ -76,8 +76,17 @@ public sealed partial class MainWindow : Window
         var hwnd = WindowNative.GetWindowHandle(this);
         Handle = new Windows.Win32.Foundation.HWND(hwnd);
         WinExStyle |= Windows.Win32.UI.WindowsAndMessaging.WINDOW_EX_STYLE.WS_EX_LAYERED; // We'll use WS_EX_LAYERED, not WS_EX_TRANSPARENT, for the effect.
-        // We want the user to be able to close the app from the taskbar, so we'll forbear the tool window.
-        //WinExStyle |= Windows.Win32.UI.WindowsAndMessaging.WINDOW_EX_STYLE.WS_EX_TOOLWINDOW; // Prevent accidental Minimize/Maximize.
+        if (App.LocalConfig!.hideTaskbar)
+        {
+            WinExStyle |= Windows.Win32.UI.WindowsAndMessaging.WINDOW_EX_STYLE.WS_EX_TOOLWINDOW;
+            // There are also the AppWindow properties that can be used:
+            // - AppWindow.IsShownInSwitchers = false
+            // - AppWindow.TitleBar.IconShowOptions = Microsoft.UI.Windowing.IconShowOptions.HideIconAndSystemMenu
+        }
+        else // We want the user to be able to close the app from the taskbar, so we'll forbear the tool window.
+        {
+            Debug.WriteLine($"Skipping STYLE.WS_EX_TOOLWINDOW due to config.");
+        }
         SystemBackdrop = new TransparentBackdrop();
         root.Background = new SolidColorBrush(Microsoft.UI.Colors.Green);
         root.Background = new SolidColorBrush(Microsoft.UI.Colors.Transparent);
@@ -194,7 +203,7 @@ public sealed partial class MainWindow : Window
         }
         else
         {
-            Debug.WriteLine($"[WARNING] Window state is deactivated.");
+            Debug.WriteLine($"[NOTICE] Window state is deactivated.");
         }
     }
 
@@ -396,9 +405,20 @@ public sealed partial class MainWindow : Window
         else
             path = Path.Combine(ApplicationData.Current.LocalFolder.Path, "Assets");
 
-        foreach (var f in Directory.GetFiles(path, "Clock*.png", SearchOption.TopDirectoryOnly))
+        //foreach (var f in Directory.GetFiles(path, "Clock*.png", SearchOption.TopDirectoryOnly))
+        //{
+        //    clockAssets.Add(Path.GetFileName(f));
+        //}
+
+        DirectoryInfo? searchDI = new DirectoryInfo(path);
+        FileInfo[]? files = searchDI?.GetFiles("Clock*.png", SearchOption.TopDirectoryOnly);
+        if (files != null)
         {
-            clockAssets.Add(Path.GetFileName(f));
+            IOrderedEnumerable<FileInfo>? sorted = files.OrderByDescending(f => f.LastWriteTime);
+            foreach (var file in sorted) 
+            {
+                clockAssets.Add(file.Name);
+            }
         }
 
         if (App.LocalConfig.randomHands)
@@ -441,7 +461,6 @@ public sealed partial class MainWindow : Window
         else if (currentPoint.Properties.IsRightButtonPressed)
         {
             e.Handled = true;
-            //Application.Current.Exit();
             if (clockAssets.Count > 0)
             {
                 DispatcherQueue.TryEnqueue(async () =>
@@ -460,6 +479,11 @@ public sealed partial class MainWindow : Window
                     catch (Exception) { }
                 });
             }
+        }
+        else if (currentPoint.Properties.IsMiddleButtonPressed)
+        {
+            e.Handled = true;
+            Application.Current.Exit();
         }
     }
 

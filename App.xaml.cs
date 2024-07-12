@@ -31,18 +31,18 @@ namespace Draggable;
 /// </summary>
 public partial class App : Application
 {
+    #region [Properties]
+    Window? m_window;
     int m_width = 245;
     int m_height = 270; // including titlebar
-    Window? m_window;
-    public static bool IsClosing { get; set; } = false;
-    public static IntPtr WindowHandle { get; set; }
-    public static FrameworkElement? MainRoot { get; set; }
-    public static event Action<Windows.Graphics.SizeInt32>? OnWindowSizeChanged = (size) => { };
-
     static bool _lastSave = false;
     static DateTime _lastMove = DateTime.Now;
     static DateTime _lastSize = DateTime.Now;
     static Config? _localConfig;
+    public static bool IsClosing { get; set; } = false;
+    public static IntPtr WindowHandle { get; set; }
+    public static FrameworkElement? MainRoot { get; set; }
+    public static event Action<Windows.Graphics.SizeInt32>? OnWindowSizeChanged = (size) => { };
     public static Config? LocalConfig
     {
         get => _localConfig;
@@ -73,6 +73,8 @@ public partial class App : Application
 #else
 public static bool IsPackaged { get => true; }
 #endif
+    #endregion
+
     /// <summary>
     /// Initializes the singleton application object.  This is the first line of authored code
     /// executed, and as such is the logical equivalent of main() or WinMain().
@@ -202,7 +204,7 @@ public static bool IsPackaged { get => true; }
         if (appWin != null)
         {
             // Gets or sets a value that indicates whether this window will appear in various system representations, such as ALT+TAB and taskbar.
-            if (LocalConfig.hideTaskbar)
+            if (LocalConfig!.hideTaskbar)
             {
                 appWin.IsShownInSwitchers = false;
                 appWin.TitleBar.IconShowOptions = IconShowOptions.HideIconAndSystemMenu;
