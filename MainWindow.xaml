@@ -56,7 +56,7 @@
                 Color="#000000">-->
             <Image
                 x:Name="clockImage"
-                Margin="-1"
+                Margin="-1,-1,0,0"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Opacity="0.6"
@@ -65,7 +65,7 @@
             <!--</local:CompositionShadow>-->
             <Canvas
                 x:Name="clockCanvas"
-                Margin="-1"
+                Margin="-1,-1,0,0"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center">
 
@@ -157,7 +157,7 @@
                 HorizontalAlignment="Center"
                 VerticalAlignment="Bottom"
                 FontFamily="{ThemeResource SecondaryFont}"
-                FontSize="12"
+                FontSize="11"
                 Text="Drag Me Around" />
         </Grid>
     </Grid>

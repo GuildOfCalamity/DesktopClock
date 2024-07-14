@@ -219,60 +219,112 @@ public sealed partial class MainWindow : Window
             return;
         }
 
-        // This scaling should be reworked, it's not exactly linear. These example values are approximations.
-        switch (total)
+        if (total > 100 && total < 1501)
         {
-            // Image fidelity will degrade for large sizes.
-            case int val when val >= 1500: hourHand.Y2 = -120; minuteHand.Y2 = -220; secondHand.Y2 = -260;
-                hourHand.StrokeThickness = 9; minuteHand.StrokeThickness = 8; secondHand.StrokeThickness = 7;
-                break;
-            case int val when val >= 1400: hourHand.Y2 = -110; minuteHand.Y2 = -190; secondHand.Y2 = -240;
-                hourHand.StrokeThickness = 8; minuteHand.StrokeThickness = 7; secondHand.StrokeThickness = 6;
-                break;
-            case int val when val >= 1300: hourHand.Y2 = -105; minuteHand.Y2 = -160; secondHand.Y2 = -220;
-                hourHand.StrokeThickness = 8; minuteHand.StrokeThickness = 7; secondHand.StrokeThickness = 6;
-                break;
-            case int val when val >= 1200: hourHand.Y2 = -100; minuteHand.Y2 = -140; secondHand.Y2 = -180;
-                hourHand.StrokeThickness = 7; minuteHand.StrokeThickness = 6; secondHand.StrokeThickness = 5;
-                break;
-            case int val when val >= 1100: hourHand.Y2 = -90; minuteHand.Y2 = -130; secondHand.Y2 = -170;
-                hourHand.StrokeThickness = 7; minuteHand.StrokeThickness = 6; secondHand.StrokeThickness = 5;
-                break;
-            case int val when val >= 1000: hourHand.Y2 = -85; minuteHand.Y2 = -120; secondHand.Y2 = -160;
-                hourHand.StrokeThickness = 7; minuteHand.StrokeThickness = 6; secondHand.StrokeThickness = 5;
-                break;
-            case int val when val >= 900: hourHand.Y2 = -80; minuteHand.Y2 = -100; secondHand.Y2 = -130;
-                hourHand.StrokeThickness = 6; minuteHand.StrokeThickness = 5; secondHand.StrokeThickness = 4;
-                break;
-            case int val when val >= 800: hourHand.Y2 = -75; minuteHand.Y2 = -90; secondHand.Y2 = -120;
-                hourHand.StrokeThickness = 6; minuteHand.StrokeThickness = 5; secondHand.StrokeThickness = 4;
-                break;
-            case int val when val >= 700: hourHand.Y2 = -60; minuteHand.Y2 = -80; secondHand.Y2 = -110;
-                hourHand.StrokeThickness = 5; minuteHand.StrokeThickness = 4; secondHand.StrokeThickness = 3;
-                break;
-            case int val when val >= 600: hourHand.Y2 = -50; minuteHand.Y2 = -70; secondHand.Y2 = -90;
-                hourHand.StrokeThickness = 5; minuteHand.StrokeThickness = 4; secondHand.StrokeThickness = 3;
-                break;
-            case int val when val >= 500: hourHand.Y2 = -40; minuteHand.Y2 = -59; secondHand.Y2 = -80;
-                hourHand.StrokeThickness = 5; minuteHand.StrokeThickness = 4; secondHand.StrokeThickness = 3;
-                break;
-            case int val when val >= 400: hourHand.Y2 = -32; minuteHand.Y2 = -48; secondHand.Y2 = -68;
-                hourHand.StrokeThickness = 5; minuteHand.StrokeThickness = 4; secondHand.StrokeThickness = 3;
-                break;
-            case int val when val >= 300: hourHand.Y2 = -22; minuteHand.Y2 = -35; secondHand.Y2 = -45;
-                hourHand.StrokeThickness = 4; minuteHand.StrokeThickness = 3; secondHand.StrokeThickness = 2;
-                break;
-            case int val when val >= 200: hourHand.Y2 = -18; minuteHand.Y2 = -27; secondHand.Y2 = -38;
-                hourHand.StrokeThickness = 4; minuteHand.StrokeThickness = 3; secondHand.StrokeThickness = 2;
-                break;
-            case int val when val >= 100: hourHand.Y2 = -15; minuteHand.Y2 = -20; secondHand.Y2 = -32;
-                hourHand.StrokeThickness = 4; minuteHand.StrokeThickness = 3; secondHand.StrokeThickness = 2;
-                break;
-            default: hourHand.Y2 = -10; minuteHand.Y2 = -15; secondHand.Y2 = -24;
-                hourHand.StrokeThickness = 4; minuteHand.StrokeThickness = 3; secondHand.StrokeThickness = 2;
-                break;
+            Debug.WriteLine($"[INFO] Using non-linear scaling...");
+            
+            secondHand.Y2 = ScaleNonLinearExp(total, 100, 1500, 24, 250) * -1d;
+            secondHand.StrokeThickness = ScaleNonLinearExp(total, 100, 1500, 1, 7);
+            
+            minuteHand.Y2 = ScaleNonLinearExp(total, 100, 1500, 15, 190) * -1d;
+            minuteHand.StrokeThickness = ScaleNonLinearExp(total, 100, 1500, 3, 8);
+            
+            hourHand.Y2 = ScaleNonLinearExp(total, 100, 1500, 10, 120) * -1d;
+            hourHand.StrokeThickness = ScaleNonLinearExp(total, 100, 1500, 4, 9);
+        }
+        else
+        {
+            // This scaling should be reworked, it's not exactly linear. These example values are approximations.
+            switch (total)
+            {
+                // Image fidelity will degrade for large sizes.
+                case int val when val >= 1500:
+                    hourHand.Y2 = -120; minuteHand.Y2 = -220; secondHand.Y2 = -260;
+                    hourHand.StrokeThickness = 9; minuteHand.StrokeThickness = 8; secondHand.StrokeThickness = 7;
+                    break;
+                case int val when val >= 1400:
+                    hourHand.Y2 = -110; minuteHand.Y2 = -190; secondHand.Y2 = -240;
+                    hourHand.StrokeThickness = 8; minuteHand.StrokeThickness = 7; secondHand.StrokeThickness = 6;
+                    break;
+                case int val when val >= 1300:
+                    hourHand.Y2 = -105; minuteHand.Y2 = -160; secondHand.Y2 = -220;
+                    hourHand.StrokeThickness = 8; minuteHand.StrokeThickness = 7; secondHand.StrokeThickness = 6;
+                    break;
+                case int val when val >= 1200:
+                    hourHand.Y2 = -100; minuteHand.Y2 = -140; secondHand.Y2 = -180;
+                    hourHand.StrokeThickness = 7; minuteHand.StrokeThickness = 6; secondHand.StrokeThickness = 5;
+                    break;
+                case int val when val >= 1100:
+                    hourHand.Y2 = -90; minuteHand.Y2 = -130; secondHand.Y2 = -170;
+                    hourHand.StrokeThickness = 7; minuteHand.StrokeThickness = 6; secondHand.StrokeThickness = 5;
+                    break;
+                case int val when val >= 1000:
+                    hourHand.Y2 = -85; minuteHand.Y2 = -120; secondHand.Y2 = -160;
+                    hourHand.StrokeThickness = 7; minuteHand.StrokeThickness = 6; secondHand.StrokeThickness = 5;
+                    break;
+                case int val when val >= 900:
+                    hourHand.Y2 = -80; minuteHand.Y2 = -100; secondHand.Y2 = -130;
+                    hourHand.StrokeThickness = 6; minuteHand.StrokeThickness = 5; secondHand.StrokeThickness = 3;
+                    break;
+                case int val when val >= 800:
+                    hourHand.Y2 = -75; minuteHand.Y2 = -90; secondHand.Y2 = -120;
+                    hourHand.StrokeThickness = 6; minuteHand.StrokeThickness = 5; secondHand.StrokeThickness = 3;
+                    break;
+                case int val when val >= 700:
+                    hourHand.Y2 = -60; minuteHand.Y2 = -80; secondHand.Y2 = -110;
+                    hourHand.StrokeThickness = 5; minuteHand.StrokeThickness = 4; secondHand.StrokeThickness = 2;
+                    break;
+                case int val when val >= 600:
+                    hourHand.Y2 = -50; minuteHand.Y2 = -70; secondHand.Y2 = -90;
+                    hourHand.StrokeThickness = 5; minuteHand.StrokeThickness = 4; secondHand.StrokeThickness = 2;
+                    break;
+                case int val when val >= 500:
+                    hourHand.Y2 = -40; minuteHand.Y2 = -59; secondHand.Y2 = -80;
+                    hourHand.StrokeThickness = 5; minuteHand.StrokeThickness = 4; secondHand.StrokeThickness = 2;
+                    break;
+                case int val when val >= 400:
+                    hourHand.Y2 = -32; minuteHand.Y2 = -48; secondHand.Y2 = -68;
+                    hourHand.StrokeThickness = 5; minuteHand.StrokeThickness = 4; secondHand.StrokeThickness = 2;
+                    break;
+                case int val when val >= 300:
+                    hourHand.Y2 = -22; minuteHand.Y2 = -35; secondHand.Y2 = -45;
+                    hourHand.StrokeThickness = 4; minuteHand.StrokeThickness = 3; secondHand.StrokeThickness = 1;
+                    break;
+                case int val when val >= 200:
+                    hourHand.Y2 = -18; minuteHand.Y2 = -27; secondHand.Y2 = -38;
+                    hourHand.StrokeThickness = 4; minuteHand.StrokeThickness = 3; secondHand.StrokeThickness = 1;
+                    break;
+                case int val when val >= 100:
+                    hourHand.Y2 = -15; minuteHand.Y2 = -20; secondHand.Y2 = -32;
+                    hourHand.StrokeThickness = 4; minuteHand.StrokeThickness = 3; secondHand.StrokeThickness = 1;
+                    break;
+                default:
+                    hourHand.Y2 = -10; minuteHand.Y2 = -15; secondHand.Y2 = -24;
+                    hourHand.StrokeThickness = 4; minuteHand.StrokeThickness = 3; secondHand.StrokeThickness = 1;
+                    break;
+            }
         }
         Debug.WriteLine($"[INFO] Total: {total}, Ratio: {ratio}, Hour.Y2: {hourHand.Y2}, Minute.Y2: {minuteHand.Y2}, Second.Y2: {secondHand.Y2}");
+    }
+
+    double ScaleNonLinearExp(double input, double inputMin, double inputMax, double outputMin, double outputMax, double steepness = 1.19)
+    {
+        input = Math.Max(inputMin, Math.Min(inputMax, input));
+        double normalizedInput = (input - inputMin) / (inputMax - inputMin);
+        double scaledInput = Math.Pow(normalizedInput, steepness);
+        double output = outputMin + (scaledInput * (outputMax - outputMin));
+        return output;
+    }
+
+    double ScaleNonLinearLog(double input, double inputMin, double inputMax, double outputMin, double outputMax)
+    {
+        input = Math.Max(inputMin, Math.Min(inputMax, input));
+        double logMin = Math.Log(inputMin);
+        double logMax = Math.Log(inputMax);
+        double logInput = Math.Log(input);
+        double scaledLogValue = (logInput - logMin) / (logMax - logMin);
+        double output = outputMin + (scaledLogValue * (outputMax - outputMin));
+        return output;
     }
     #endregion
 
