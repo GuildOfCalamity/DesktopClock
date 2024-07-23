@@ -6,6 +6,8 @@
 
 ![Example Picture](./ScreenShot3.png)
 
+![Example Picture](./ScreenShot4.png)
+
 * Demonstration of transparent/draggable [WinUI3](https://learn.microsoft.com/en-us/windows/apps/winui/winui3) [Window](https://learn.microsoft.com/en-us/windows/windows-app-sdk/api/winrt/microsoft.ui.xaml.window?view=windows-app-sdk-1.5) widget.
 * This feature is trivial when using the [AllowsTransparency](https://learn.microsoft.com/en-us/dotnet/api/system.windows.window.allowstransparency?view=windowsdesktop-8.0#remarks) property in **WPF**; but since the **WinUI3** Window is meant for x-plat purposes we do not have that luxury. 
 * Other [Nuget](https://learn.microsoft.com/en-us/nuget/what-is-nuget) packages include:
@@ -18,7 +20,7 @@
 * Initial commit.
 
 ## 🎛️ Usage
-* Right-click to change the clockface asset.
+* Right-click to change the clockface asset. This will create a selection window with an `ItemsRepeater`.
 * All settings can be found in the executing folder in the file `DraggableConfig.json`.
 * You can add your own clockface assets into the subfolder `Assets`. I recommend the size 200px by 200px.
 * There are two versions of each clockface asset:

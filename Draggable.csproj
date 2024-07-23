@@ -63,6 +63,11 @@
     <None Remove="Assets\Fonts\Aptos.ttf" />
     <None Remove="Assets\Fonts\Aptos_Mono.ttf" />
     <None Remove="CompositionShadow.xaml" />
+    <None Remove="ScreenShot1.png" />
+    <None Remove="ScreenShot2.png" />
+    <None Remove="ScreenShot3.png" />
+    <None Remove="ScreenShot4.png" />
+    <None Remove="SelectionWindow.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -87,6 +92,11 @@
   -->
   <ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
     <ProjectCapability Include="Msix" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="SelectionWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="CompositionShadow.xaml">

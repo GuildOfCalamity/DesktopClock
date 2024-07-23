@@ -21,7 +21,6 @@ using Windows.UI;
 
 using WinRT.Interop;
 
-
 namespace Draggable;
 
 public sealed partial class MainWindow : Window
@@ -36,6 +35,7 @@ public sealed partial class MainWindow : Window
     SolidColorBrush scbHour = new SolidColorBrush(Microsoft.UI.Colors.RoyalBlue);
     SolidColorBrush scbMinute = new SolidColorBrush(Microsoft.UI.Colors.Gray);
     SolidColorBrush scbSecond = new SolidColorBrush(Microsoft.UI.Colors.Firebrick);
+    SelectionWindow? selectionWin;
 
     #region [Testing Borderless]
     static int GWL_STYLE = -16;          // message for title bar's style
@@ -124,6 +124,37 @@ public sealed partial class MainWindow : Window
         App.OnWindowSizeChanged += AppOnWindowSizeChanged;
     }
 
+    void ReplacementRightClickEvent(object sender, RoutedEventArgs e)
+    {
+        // Show the selection window.
+        if (selectionWin is null)
+        {
+            selectionWin = new();
+            selectionWin?.Activate();
+        }
+        else
+        {
+            selectionWin?.Close();
+            selectionWin = new();
+            selectionWin?.Activate();
+        }
+    }
+
+    /// <summary>
+    /// Wrapping event-based asynchronous patterns (EAP)
+    /// </summary>
+    public Task WaitForSizeEventAsync()
+    {
+        var tcs = new TaskCompletionSource<SizeInt32>();
+        Action<Windows.Graphics.SizeInt32>? handler = null;
+        handler = (s) =>
+        {
+            App.OnWindowSizeChanged -= handler; // just say no to memory leaks
+            tcs.SetResult(s);
+        };
+        App.OnWindowSizeChanged += handler;
+        return tcs.Task;
+    }
 
     #region [Reactive Opacity]
     void MainGrid_PointerExited(object sender, PointerRoutedEventArgs e)
@@ -166,7 +197,7 @@ public sealed partial class MainWindow : Window
                         if (App.LocalConfig.clockFace.EndsWith(".png"))
                             App.LocalConfig.clockFace = App.LocalConfig.clockFace.Replace(".png", "");
 
-                        BitmapImage? img = await LoadImageAtRuntime($"{App.LocalConfig.clockFace}.png");
+                        BitmapImage? img = await Extensions.LoadImageAtRuntime($"{App.LocalConfig.clockFace}.png");
                         if (img != null)
                             clockImage.Source = img;
 
@@ -404,7 +435,7 @@ public sealed partial class MainWindow : Window
     }
     #endregion
 
-    #region [Clockface]
+    #region [Clockface Methods]
     void ClockTimerTick(object? sender, object e)
     {
         if (App.IsClosing)
@@ -515,27 +546,60 @@ public sealed partial class MainWindow : Window
             e.Handled = true;
             if (clockAssets.Count > 0)
             {
-                DispatcherQueue.TryEnqueue(async () =>
+                #region [Old Method]
+                //DispatcherQueue.TryEnqueue(async () =>
+                //{
+                //    try
+                //    {
+                //        if (assetIndex >= clockAssets.Count)
+                //            assetIndex = 0;
+                //        App.LocalConfig.clockFace = clockAssets[assetIndex];
+                //        assetIndex++;
+                //        Debug.WriteLine($"[INFO] {App.LocalConfig.clockFace}");
+                //        BitmapImage? img = await Extensions.LoadImageAtRuntime($"{App.LocalConfig.clockFace}");
+                //        if (img != null)
+                //            clockImage.Source = img;
+                //    }
+                //    catch (Exception) { }
+                //});
+                #endregion
+
+                #region [New Method]
+                // Show the asset selection window.
+                if (selectionWin is null)
                 {
-                    try
-                    {
-                        if (assetIndex >= clockAssets.Count)
-                            assetIndex = 0;
-                        App.LocalConfig.clockFace = clockAssets[assetIndex];
-                        assetIndex++;
-                        Debug.WriteLine($"[INFO] {App.LocalConfig.clockFace}");
-                        BitmapImage? img = await LoadImageAtRuntime($"{App.LocalConfig.clockFace}");
-                        if (img != null)
-                            clockImage.Source = img;
-                    }
-                    catch (Exception) { }
-                });
+                    selectionWin = new();
+                    selectionWin.ClockSelectedEvent -= ClockSelected;
+                    selectionWin.ClockSelectedEvent += ClockSelected;
+                    selectionWin?.Activate();
+                }
+                else
+                {
+                    selectionWin?.Close();
+                    selectionWin = new();
+                    selectionWin.ClockSelectedEvent -= ClockSelected;
+                    selectionWin.ClockSelectedEvent += ClockSelected;
+                    selectionWin?.Activate();
+                }
+                #endregion
             }
         }
         else if (currentPoint.Properties.IsMiddleButtonPressed)
         {
             e.Handled = true;
             Application.Current.Exit();
+        }
+    }
+
+    void ClockSelected(AssetIndexItem? clk)
+    {
+        if (clk is not null)
+        {
+            DispatcherQueue.TryEnqueue(() => 
+            {
+                App.LocalConfig.clockFace = clk.ClockName;
+                clockImage.Source = clk.ClockImage; 
+            });
         }
     }
 
@@ -609,32 +673,7 @@ public sealed partial class MainWindow : Window
     #endregion
 
     #region [Image Helpers]
-    async Task<BitmapImage> LoadImageAtRuntime(string imageName)
-    {
-        try
-        {
-            BitmapImage bitmapImage = new BitmapImage();
-            var uri = new Uri($"ms-appx:///Assets/{imageName}");
-#if IS_UNPACKAGED
-            StorageFile file = await StorageFile.GetFileFromPathAsync(Path.Combine(Directory.GetCurrentDirectory(), $"Assets\\{imageName}"));
-#else
-            StorageFile file = await StorageFile.GetFileFromApplicationUriAsync(uri);
-#endif
-            using (var stream = await file.OpenAsync(FileAccessMode.Read))
-            {
-                await bitmapImage.SetSourceAsync(stream); // Set the BitmapImage source to the stream.
-            }
-            return bitmapImage;
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"[ERROR] LoadImageAtRuntime: {ex.Message}");
-            return new BitmapImage() { UriSource = new Uri($"ms-appx:///Assets/{imageName}") };
-        }
-    }
-
-
-    /// <summary>
+     /// <summary>
     /// Generic loader for software bitmaps.
     /// </summary>
     /// <param name="filePath">Full path to asset.</param>

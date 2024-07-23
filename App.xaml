@@ -25,10 +25,16 @@
             <Color x:Key="LinearBorder2">#9F306CCC</Color>
             <Color x:Key="LinearBorder3">#9F224F91</Color>
             <Color x:Key="LinearBorder4">#9F142E54</Color>
-            <Color x:Key="LinearBorder5">#9F8019FF</Color>
-            <Color x:Key="LinearBorder6">#9F7115E1</Color>
-            <Color x:Key="LinearBorder7">#9F4E10A5</Color>
-            <Color x:Key="LinearBorder8">#9F2A095B</Color>
+            <Color x:Key="LinearBorder5">#AFF0F0F0</Color>
+            <Color x:Key="LinearBorder6">#AFD0D0D0</Color>
+            <Color x:Key="LinearBorder7">#AFB0B0B0</Color>
+            <Color x:Key="LinearBorder8">#AF808080</Color>
+
+            <LinearGradientBrush x:Key="GradientTitleBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0.0" Color="#FFF0F0F0" />
+                <GradientStop Offset="0.4" Color="#FF6C6C6C" />
+                <GradientStop Offset="1.0" Color="#FFD0D0D0" />
+            </LinearGradientBrush>
 
             <LinearGradientBrush x:Key="GradientBorderBrush" StartPoint="0,0" EndPoint="0,1">
                 <GradientStop Offset="0.0" Color="{StaticResource LinearBorder1}" />
