@@ -21,7 +21,10 @@
             <StaticResource x:Key="GridViewItemBackgroundSelectedPointerOver" ResourceKey="AccentFillColorSecondaryBrush" />
             <StaticResource x:Key="GridViewItemForegroundSelected" ResourceKey="TextOnAccentFillColorPrimaryBrush" />
             <DataTemplate x:Key="IconTemplate" x:DataType="local:AssetIndexItem">
-                <UserControl PointerExited="IconsTemplateOnPointerExited" PointerPressed="IconsTemplateOnPointerPressed">
+                <UserControl
+                    PointerEntered="IconsTemplateOnPointerEntered"
+                    PointerExited="IconsTemplateOnPointerExited"
+                    PointerPressed="IconsTemplateOnPointerPressed">
                     <Border
                         x:Name="borderItem"
                         MinWidth="100"

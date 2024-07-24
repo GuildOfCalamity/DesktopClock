@@ -190,6 +190,25 @@ public sealed partial class SelectionWindow : Window
         }
     }
 
+    void IconsTemplateOnPointerEntered(object sender, PointerRoutedEventArgs e)
+    {
+        var obj = sender as UIElement;
+        if (obj is not null)
+        {
+            var itemIndex = AssetsRepeater.GetElementIndex(obj);
+            if (itemIndex != -1)
+            {
+                SelectedClock = ClockItems[itemIndex];
+                Debug.WriteLine($"[INFO] De-selecting index {itemIndex}.");
+                MoveToSelectionState(obj, true);
+            }
+            else
+            {
+                Debug.WriteLine($"[WARNING] GetElementIndex was not valid.");
+            }
+        }
+    }
+
     void IconsTemplateOnPointerExited(object sender, PointerRoutedEventArgs e)
     {
         var obj = sender as UIElement;
