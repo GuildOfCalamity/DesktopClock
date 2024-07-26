@@ -28,7 +28,8 @@ namespace Draggable;
 /// </summary>
 public sealed partial class SelectionWindow : Window
 {
-    SystemBackdropConfiguration? _configurationSource;
+    bool thisIsClosing = false;
+    SystemBackdropConfiguration ? _configurationSource;
     DesktopAcrylicController? _acrylicController;
     Microsoft.UI.Windowing.AppWindow? appWindow;
     public ObservableCollection<AssetIndexItem> ClockItems { get; set; } = new();
@@ -58,6 +59,8 @@ public sealed partial class SelectionWindow : Window
         appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId); // Lastly, retrieve the AppWindow for the current (XAML) WinUI3 window.
         if (appWindow is not null)
         {
+            appWindow.Closing += (s, e) => { thisIsClosing = true; };
+
             if (App.IsPackaged)
                 appWindow?.SetIcon(System.IO.Path.Combine(Windows.ApplicationModel.Package.Current.InstalledLocation.Path, $"Assets/StoreLogo.ico"));
             else
@@ -117,7 +120,7 @@ public sealed partial class SelectionWindow : Window
     /// </summary>
     void AssetsRepeaterOnLoaded(object sender, RoutedEventArgs e)
     {
-        if (ClockItems.Count > 0 || App.IsClosing)
+        if (ClockItems.Count > 0 || thisIsClosing)
             return;
 
         appWindow?.Resize(new Windows.Graphics.SizeInt32(780, 480));
@@ -138,6 +141,9 @@ public sealed partial class SelectionWindow : Window
 
             DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Normal, async () =>
             {
+                if (thisIsClosing)
+                    return;
+
                 DirectoryInfo? searchDI = new DirectoryInfo(path);
                 FileInfo[]? files = searchDI?.GetFiles("Clock*.png", SearchOption.TopDirectoryOnly);
                 if (files != null)
@@ -145,7 +151,7 @@ public sealed partial class SelectionWindow : Window
                     IOrderedEnumerable<FileInfo>? sorted = files.OrderByDescending(f => f.LastWriteTime);
                     foreach (var file in sorted)
                     {
-                        if (App.IsClosing)
+                        if (thisIsClosing)
                             break;
 
                         BitmapImage? img = await Extensions.LoadImageAtRuntime($"{file.Name}");
@@ -156,6 +162,9 @@ public sealed partial class SelectionWindow : Window
 
             DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Normal, () =>
             {
+                if (thisIsClosing)
+                    return;
+
                 AssetsRepeater.ItemsSource = ClockItems;
             });
         });
@@ -235,6 +244,9 @@ public sealed partial class SelectionWindow : Window
 
         for (int i = 0; i < ClockItems.Count; i++)
         {
+            if (thisIsClosing)
+                break;
+
             var item = AssetsRepeater.TryGetElement(i);
             if (item is not null)
                 MoveToSelectionState(item, false);

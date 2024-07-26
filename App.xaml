@@ -32,7 +32,7 @@
 
             <LinearGradientBrush x:Key="GradientTitleBrush" StartPoint="0,0" EndPoint="0,1">
                 <GradientStop Offset="0.0" Color="#FFF0F0F0" />
-                <GradientStop Offset="0.4" Color="#FF6C6C6C" />
+                <GradientStop Offset="0.4" Color="#FF8C8C8C" />
                 <GradientStop Offset="1.0" Color="#FFD0D0D0" />
             </LinearGradientBrush>
 

@@ -124,22 +124,6 @@ public sealed partial class MainWindow : Window
         App.OnWindowSizeChanged += AppOnWindowSizeChanged;
     }
 
-    void ReplacementRightClickEvent(object sender, RoutedEventArgs e)
-    {
-        // Show the selection window.
-        if (selectionWin is null)
-        {
-            selectionWin = new();
-            selectionWin?.Activate();
-        }
-        else
-        {
-            selectionWin?.Close();
-            selectionWin = new();
-            selectionWin?.Activate();
-        }
-    }
-
     /// <summary>
     /// Wrapping event-based asynchronous patterns (EAP)
     /// </summary>
@@ -575,7 +559,8 @@ public sealed partial class MainWindow : Window
                 }
                 else
                 {
-                    selectionWin?.Close();
+                    selectionWin.Close();
+                    selectionWin = null;
                     selectionWin = new();
                     selectionWin.ClockSelectedEvent -= ClockSelected;
                     selectionWin.ClockSelectedEvent += ClockSelected;
