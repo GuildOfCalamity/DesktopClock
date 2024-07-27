@@ -22,6 +22,8 @@
 
 ## 🎛️ Usage
 * Right-click to change the clockface asset. This will create a selection window with an `ItemsRepeater`.
+* Left-click to drag the clock around the desktop (placement will be remembered).
+* When resizing the window, the clock and hands will scale to match.
 * All settings can be found in the executing folder in the file `DraggableConfig.json`.
 * You can add your own clockface assets into the subfolder `Assets`. I recommend the size 200px by 200px.
 * There are two versions of each clockface asset:
