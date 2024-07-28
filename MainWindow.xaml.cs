@@ -165,6 +165,9 @@ public sealed partial class MainWindow : Window
         // Only perform asset updates if window is visible.
         if (args.WindowActivationState != WindowActivationState.Deactivated)
         {
+            if (selectionWin != null)
+                selectionWin.Activate(); // User could forget/lose the window if it's hidden from other open apps on the desktop.
+
             SetIsAlwaysOnTop(this, true);
             DispatcherQueue.TryEnqueue(async () =>
             {

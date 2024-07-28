@@ -191,6 +191,7 @@ public sealed partial class SelectionWindow : Window
                 Debug.WriteLine($"[INFO] Moving to selection index {itemIndex}.");
                 MoveToSelectionState(obj, true);
                 ClockSelectedEvent.Invoke(SelectedClock);
+                //this.Close();
             }
             else
             {

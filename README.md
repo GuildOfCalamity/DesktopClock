@@ -18,7 +18,7 @@
 
 ## 📝 v1.0.0.0 - July 2024
 * Initial commit.
-* Over 250 clock faces to choose from!
+* Over 280 clock faces to choose from!
 
 ## 🎛️ Usage
 * Right-click to change the clockface asset. This will create a selection window with an `ItemsRepeater`.
