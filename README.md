@@ -8,6 +8,8 @@
 
 ![Example Picture](./ScreenShot4.png)
 
+![Example Picture](./ScreenShot5.png)
+
 * Demonstration of transparent/draggable [WinUI3](https://learn.microsoft.com/en-us/windows/apps/winui/winui3) [Window](https://learn.microsoft.com/en-us/windows/windows-app-sdk/api/winrt/microsoft.ui.xaml.window?view=windows-app-sdk-1.5) widget.
 * This feature is trivial when using the [AllowsTransparency](https://learn.microsoft.com/en-us/dotnet/api/system.windows.window.allowstransparency?view=windowsdesktop-8.0#remarks) property in **WPF**; but since the **WinUI3** Window is meant for x-plat purposes we do not have that luxury. 
 * Other [Nuget](https://learn.microsoft.com/en-us/nuget/what-is-nuget) packages include:
@@ -18,7 +20,7 @@
 
 ## 📝 v1.0.0.0 - July 2024
 * Initial commit.
-* Over 300 clock faces to choose from!
+* Over 330 clock faces to choose from!
 
 ## 🎛️ Usage
 * Right-click to change the clockface asset. This will create a selection window with an `ItemsRepeater`.
