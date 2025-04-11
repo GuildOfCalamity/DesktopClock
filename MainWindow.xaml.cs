@@ -69,7 +69,7 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         this.InitializeComponent();
-        this.Activated += MainWindow_Activated;
+        this.Activated += MainWindowOnActivated;
         this.Title = $"{App.GetCurrentAssemblyName()}";
 
         #region [Transparency]
@@ -96,7 +96,10 @@ public sealed partial class MainWindow : Window
         //var style = Windows.Win32.PInvoke.GetWindowLong(Handle, Windows.Win32.UI.WindowsAndMessaging.WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
         //_ = Windows.Win32.PInvoke.SetWindowLong(Handle, Windows.Win32.UI.WindowsAndMessaging.WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE, (int)(style & ~(WS_CAPTION | WS_SIZEBOX))); //removes caption and the sizebox from current style
 
-        if (showMessages && Microsoft.UI.Windowing.AppWindowTitleBar.IsCustomizationSupported())
+        Debug.WriteLine($"Running {App.OperatingSystem} version {App.WindowsVersion}");
+
+        // v10.0.22631.5039 (Windows 11)
+        if (showMessages || App.WindowsVersion >= new Version(10, 0, 22631) && Microsoft.UI.Windowing.AppWindowTitleBar.IsCustomizationSupported())
         {
             this.ExtendsContentIntoTitleBar = true;
             SetTitleBar(CustomTitleBar);
@@ -157,7 +160,7 @@ public sealed partial class MainWindow : Window
     #endregion
 
     #region [Window Events]
-    void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
+    void MainWindowOnActivated(object sender, WindowActivatedEventArgs args)
     {
         if (App.IsClosing)
             return;
@@ -166,6 +169,8 @@ public sealed partial class MainWindow : Window
         if (args.WindowActivationState != WindowActivationState.Deactivated)
         {
             //if (selectionWin != null) { selectionWin.Activate(); } // User could forget/lose the window if it's hidden from other open apps on the desktop.
+
+            //WinExStyle |= Windows.Win32.UI.WindowsAndMessaging.WINDOW_EX_STYLE.WS_EX_LAYERED; // We'll use WS_EX_LAYERED, not WS_EX_TRANSPARENT, for the effect.
 
             SetIsAlwaysOnTop(this, true);
             DispatcherQueue.TryEnqueue(async () =>

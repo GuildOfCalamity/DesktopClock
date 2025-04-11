@@ -22,6 +22,7 @@ using Microsoft.UI.Xaml.Shapes;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.UI.Popups;
+using Windows.Security.ExchangeActiveSyncProvisioning;
 
 
 namespace Draggable;
@@ -39,6 +40,7 @@ public partial class App : Application
     static DateTime _lastMove = DateTime.Now;
     static DateTime _lastSize = DateTime.Now;
     static Config? _localConfig;
+    public static Version WindowsVersion => Extensions.GetWindowsVersionUsingAnalyticsInfo();
     public static bool IsClosing { get; set; } = false;
     public static IntPtr WindowHandle { get; set; }
     public static FrameworkElement? MainRoot { get; set; }
@@ -67,12 +69,40 @@ public partial class App : Application
         return false;
     };
 
+    static EasClientDeviceInformation m_deviceInfo = new EasClientDeviceInformation();
+
     // https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/#advantages-and-disadvantages-of-packaging-your-app
 #if IS_UNPACKAGED // We're using a custom PropertyGroup Condition we defined in the csproj to help us with the decision.
     public static bool IsPackaged { get => false; }
 #else
 public static bool IsPackaged { get => true; }
 #endif
+
+    public static string OperatingSystem
+    {
+        get => m_deviceInfo.OperatingSystem;
+    }
+    public static string DeviceManufacturer
+    {
+        get => m_deviceInfo.SystemManufacturer;
+    }
+    public static string DeviceModel
+    {
+        get => m_deviceInfo.SystemProductName;
+    }
+    public static string FirmwareVersion
+    {
+        get => m_deviceInfo.SystemFirmwareVersion;
+    }
+    public static string MachineName
+    {
+        get => m_deviceInfo.FriendlyName;
+    }
+    public static string MachineSku
+    {
+        get => m_deviceInfo.SystemSku;
+    }
+
     #endregion
 
     /// <summary>

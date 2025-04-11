@@ -1,23 +1,53 @@
 ﻿using Microsoft.UI;
+using Microsoft.UI.Xaml.Media.Imaging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.Storage;
 
 namespace Draggable;
 
 public static class Extensions
 {
+    public static string NameOf(this object obj) => $"{obj.GetType().Name} => {obj.GetType().BaseType?.Name}";
+
     /// <summary>
     /// Multiplies the given <see cref="TimeSpan"/> by the scalar amount provided.
     /// </summary>
     public static TimeSpan Multiply(this TimeSpan timeSpan, double scalar) => new TimeSpan((long)(timeSpan.Ticks * scalar));
+
+
+    public static async Task<BitmapImage> LoadImageAtRuntime(string imageName)
+    {
+        try
+        {
+            BitmapImage bitmapImage = new BitmapImage();
+            var uri = new Uri($"ms-appx:///Assets/{imageName}");
+#if IS_UNPACKAGED
+            StorageFile file = await StorageFile.GetFileFromPathAsync(Path.Combine(Directory.GetCurrentDirectory(), $"Assets\\{imageName}"));
+#else
+            StorageFile file = await StorageFile.GetFileFromApplicationUriAsync(uri);
+#endif
+            using (var stream = await file.OpenAsync(FileAccessMode.Read))
+            {
+                await bitmapImage.SetSourceAsync(stream); // Set the BitmapImage source to the stream.
+            }
+            return bitmapImage;
+        }
+        catch (Exception ex)
+        {
+            App.DebugLog($"LoadImageAtRuntime: {ex.Message}");
+            return new BitmapImage() { UriSource = new Uri($"ms-appx:///Assets/{imageName}") };
+        }
+    }
 
     /// <summary>
     /// Returns the AppData path including the <paramref name="moduleName"/>.
@@ -205,8 +235,49 @@ public static class Extensions
     /// Linear interpolation for a range of floats.
     /// </summary>
     public static float Lerp(this float start, float end, float amount = 0.5F) => start + (end - start) * amount;
-    public static float LogLerp(this float start, float end, float percent, float logBase = 1.2F) => start + (end - start) * (float)Math.Log(percent, logBase);
+    /// <summary>
+    /// Linear interpolation for a range of double.
+    /// </summary>
+    public static double Lerp(this double start, double end, double amount = 0.5F) => start + (end - start) * amount;
+    public static float LogLerp(this float start, float end, float percent, float logBase = 1.2F) => start + (end - start) * MathF.Log(percent, logBase);
+    public static double LogLerp(this double start, double end, double percent, double logBase = 1.2F) => start + (end - start) * Math.Log(percent, logBase);
 
+    /// <summary>
+    /// Scales a range of integers. [baseMin to baseMax] will become [limitMin to limitMax]
+    /// </summary>
+    public static int Scale(this int valueIn, int baseMin, int baseMax, int limitMin, int limitMax) => ((limitMax - limitMin) * (valueIn - baseMin) / (baseMax - baseMin)) + limitMin;
+    /// <summary>
+    /// Scales a range of floats. [baseMin to baseMax] will become [limitMin to limitMax]
+    /// </summary>
+    public static float Scale(this float valueIn, float baseMin, float baseMax, float limitMin, float limitMax) => ((limitMax - limitMin) * (valueIn - baseMin) / (baseMax - baseMin)) + limitMin;
+    /// <summary>
+    /// Scales a range of double. [baseMin to baseMax] will become [limitMin to limitMax]
+    /// </summary>
+    public static double Scale(this double valueIn, double baseMin, double baseMax, double limitMin, double limitMax) => ((limitMax - limitMin) * (valueIn - baseMin) / (baseMax - baseMin)) + limitMin;
+
+    public static int MapValue(this int val, int inMin, int inMax, int outMin, int outMax) => (val - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
+
+    public static float MapValue(this float val, float inMin, float inMax, float outMin, float outMax) => (val - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
+
+    public static double MapValue(this double val, double inMin, double inMax, double outMin, double outMax) => (val - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
+
+    /// <summary>
+    /// Used to gradually reduce the effect of certain changes over time.
+    /// </summary>
+    /// <param name="value">Some initial value, e.g. 40</param>
+    /// <param name="target">Where we want the value to end up, e.g. 100</param>
+    /// <param name="rate">How quickly we want to reach the target, e.g. 0.25</param>
+    /// <returns></returns>
+    public static float Dampen(this float value, float target, float rate)
+    {
+        float dampenedValue = value;
+        if (value != target)
+        {
+            float dampeningFactor = MathF.Pow(1 - MathF.Abs((value - target) / rate), 2);
+            dampenedValue = target + ((value - target) * dampeningFactor);
+        }
+        return dampenedValue;
+    }
     /// <summary>
     /// Similar to <see cref="GetReadableTime(TimeSpan)"/>.
     /// </summary>
@@ -435,5 +506,29 @@ public static class Extensions
 
         TValue validValue = value.GetValueOrDefault();
         return (TValue)(object)validValue;
+    }
+
+
+    /// <summary>
+    /// Get OS version by way of <see cref="Windows.System.Profile.AnalyticsInfo"/>.
+    /// </summary>
+    /// <returns><see cref="Version"/></returns>
+    public static Version GetWindowsVersionUsingAnalyticsInfo()
+    {
+        try
+        {
+            ulong version = ulong.Parse(Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamilyVersion);
+            var Major = (ushort)((version & 0xFFFF000000000000L) >> 48);
+            var Minor = (ushort)((version & 0x0000FFFF00000000L) >> 32);
+            var Build = (ushort)((version & 0x00000000FFFF0000L) >> 16);
+            var Revision = (ushort)(version & 0x000000000000FFFFL);
+
+            return new Version(Major, Minor, Build, Revision);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[ERROR] GetWindowsVersionUsingAnalyticsInfo: {ex.Message}", $"{nameof(Extensions)}");
+            return new Version(); // 0.0
+        }
     }
 }

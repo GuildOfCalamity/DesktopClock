@@ -17,7 +17,7 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <!--#region [Custom TitleBar]-->
-        <Grid
+        <!--<Grid
             x:Name="CustomTitleBar"
             Grid.Row="0"
             Height="30"
@@ -34,7 +34,13 @@
                     Style="{StaticResource CaptionTextBlockStyle}"
                     Text="{x:Bind Title, Mode=OneWay}" />
             </StackPanel>
-        </Grid>
+        </Grid>-->
+        <Grid
+            x:Name="CustomTitleBar"
+            Grid.Row="0"
+            Height="15"
+            Margin="0" />
+
         <!--#endregion-->
 
         <!--#region [Clockface Content]-->
