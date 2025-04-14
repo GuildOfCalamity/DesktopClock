@@ -38,7 +38,7 @@
         <Grid
             x:Name="CustomTitleBar"
             Grid.Row="0"
-            Height="15"
+            Height="1"
             Margin="0" />
 
         <!--#endregion-->

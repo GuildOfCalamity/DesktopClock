@@ -67,6 +67,7 @@
     <None Remove="ScreenShot2.png" />
     <None Remove="ScreenShot3.png" />
     <None Remove="ScreenShot4.png" />
+    <None Remove="ScreenShot5.png" />
     <None Remove="SelectionWindow.xaml" />
   </ItemGroup>
 

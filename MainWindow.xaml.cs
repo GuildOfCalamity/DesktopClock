@@ -85,7 +85,7 @@ public sealed partial class MainWindow : Window
         }
         else // We want the user to be able to close the app from the taskbar, so we'll forbear the tool window.
         {
-            Debug.WriteLine($"Skipping STYLE.WS_EX_TOOLWINDOW due to config.");
+            Debug.WriteLine($"[INFO] Skipping STYLE.WS_EX_TOOLWINDOW due to config.");
         }
         SystemBackdrop = new TransparentBackdrop();
         root.Background = new SolidColorBrush(Microsoft.UI.Colors.Green);
@@ -96,12 +96,14 @@ public sealed partial class MainWindow : Window
         //var style = Windows.Win32.PInvoke.GetWindowLong(Handle, Windows.Win32.UI.WindowsAndMessaging.WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
         //_ = Windows.Win32.PInvoke.SetWindowLong(Handle, Windows.Win32.UI.WindowsAndMessaging.WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE, (int)(style & ~(WS_CAPTION | WS_SIZEBOX))); //removes caption and the sizebox from current style
 
-        Debug.WriteLine($"Running {App.OperatingSystem} version {App.WindowsVersion}");
+        Debug.WriteLine($"[INFO] Running {App.OperatingSystem} version {App.WindowsVersion}");
 
         // v10.0.22631.5039 (Windows 11)
         if (showMessages || App.WindowsVersion >= new Version(10, 0, 22631) && Microsoft.UI.Windowing.AppWindowTitleBar.IsCustomizationSupported())
         {
             this.ExtendsContentIntoTitleBar = true;
+            // Fix for Windows 11 still showing TitleBar
+            this.AppWindow.TitleBar.PreferredHeightOption = Microsoft.UI.Windowing.TitleBarHeightOption.Collapsed;
             SetTitleBar(CustomTitleBar);
         }
 
