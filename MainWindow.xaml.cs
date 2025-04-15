@@ -103,6 +103,16 @@ public sealed partial class MainWindow : Window
         {
             this.ExtendsContentIntoTitleBar = true;
             // Fix for Windows 11 still showing TitleBar
+            CustomTitleBar.Height = 0d;
+            this.AppWindow.TitleBar.PreferredHeightOption = Microsoft.UI.Windowing.TitleBarHeightOption.Collapsed;
+            SetTitleBar(CustomTitleBar);
+        }
+        // v10.0.19045.5737 (Windows 10)
+        else if (App.WindowsVersion >= new Version(10, 0, 19045))
+        {
+            this.ExtendsContentIntoTitleBar = true;
+            // Somewhat unnecessary, but we can reclaim some unused space on Windows 10 
+            CustomTitleBar.Height = 0d;
             this.AppWindow.TitleBar.PreferredHeightOption = Microsoft.UI.Windowing.TitleBarHeightOption.Collapsed;
             SetTitleBar(CustomTitleBar);
         }
